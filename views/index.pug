@@ -1,0 +1,44 @@
+doctype html
+include head.pug
+
+// Page Content
+.container
+  // Portfolio Item Heading
+  h1.my-4
+    | Game Monitor
+    small - Isn't it Great?
+  // Portfolio Item Row
+  .row
+    .col-md-8
+      pre.p-1.bg-dark.text-white(style="width:100%;height:100%;border:solid 1px #CCC") ... Maze view goes here?  
+    .col-md-4
+      h3.my-3 What is a Maze?
+      p
+        |A maze is a path or collection of paths, typically from an entrance to a goal.
+        |The word is used to refer both to branching tour puzzles through which the solver must find a route,
+        |and to simpler non-branching ("unicursal") patterns that lead unambiguously through a convoluted layout to a goal.
+        |(The term "labyrinth" is generally synonymous with "maze", but can also connote specifically a unicursal pattern.)
+        |The pathways and walls in a maze are typically fixed, but puzzles in which the walls and paths can change during the
+        |game are also categorised as mazes or tour puzzles.
+      h3.my-3 Code Camp Details
+      ul
+        li Much Maze!
+        li Many Fun!
+        li Lots Challenge!
+        li Very A.I.!
+  // /.row
+  // Related Projects Row
+  h3.my-4 Current Games
+  .row
+    each game in games
+      .col-md-3.col-sm-6.mb-4
+        a.btn(href=game.url)
+          .card.bg-secondary.text-center(style='border:solid 1px black; width:200px;')
+            img.card-img-top(src='images/fire_logo_150.png' alt='Team Fire!' style='width:50%;margin-right:auto;margin-left:auto;margin-top:3px')
+            h4.card-title.align-middle.text-white.font-weight-bold(style='text-shadow:2px 2px #222') #{game.team.name}
+            .card-body.bg-danger(style='border:solid 1px black')
+              p.card-text.text-white(style='text-shadow:1px 1px #222') #{game.mazeStub.seed}
+  // /.row
+// /.container
+// Footer
+include foot.pug

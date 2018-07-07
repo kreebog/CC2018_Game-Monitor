@@ -1,0 +1,36 @@
+{
+    "name": "cc2018_game-monitor",
+    "version": "1.0.0",
+    "description": "Game Monitor for Code Camp 2018",
+    "main": "/bin/server.js",
+    "scripts": {
+        "start": "node ./bin/server.js",
+        "watch": "nodemon ./bin/server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kreebog/CC2018_Game-Monitor.git"
+    },
+    "author": "Rusty Estes & James Dean",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/kreebog/CC2018_Game-Monitor/issues"
+    },
+    "homepage": "https://github.com/kreebog/CC2018_Game-Monitor#readme",
+    "devDependencies": {
+        "@types/compression": "0.0.36",
+        "@types/express": "^4.16.0",
+        "@types/pug": "^2.0.4",
+        "@types/request": "^2.47.1",
+        "typescript": "^2.9.2"
+    },
+    "dependencies": {
+        "cc2018-ts-lib": "^1.4.2",
+        "compression": "^1.7.2",
+        "dotenv": "^6.0.0",
+        "express": "^4.16.3",
+        "pug": "^2.0.3",
+        "request": "^2.87.0"
+    }
+}
