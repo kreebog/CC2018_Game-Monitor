@@ -16,7 +16,7 @@ export const SCORE_SVC_PORT = process.env.SCORE_SVC_PORT || 80;
 export const TEAM_SVC_HOST = process.env.TEAM_SVC_URL || 'http://team.code-camp-2018.svc';
 export const TEAM_SVC_PORT = process.env.TEAM_SVC_PORT || 80;
 
-export const GAME_SVC_HOST = process.env.GAME_SVC_URL || 'http://code-camp-2018.svc';
+export const GAME_SVC_HOST = process.env.GAME_SVC_URL || 'http://game-server.code-camp-2018.svc';
 export const GAME_SVC_PORT = process.env.GAME_SVC_PORT || 80;
 
 export const GAME_MON_HOST = process.env.GAME_MON_URL || 'http://monitor.code-camp.svc';
