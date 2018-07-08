@@ -18,8 +18,8 @@ exports.TEAM_SVC_HOST = process.env.TEAM_SVC_URL || 'http://team.code-camp-2018.
 exports.TEAM_SVC_PORT = process.env.TEAM_SVC_PORT || 80;
 exports.GAME_SVC_HOST = process.env.GAME_SVC_URL || 'http://game-server.code-camp-2018.svc';
 exports.GAME_SVC_PORT = process.env.GAME_SVC_PORT || 80;
-exports.GAME_SVC_HOST_EXT = process.env.GAME_SVC_URL || 'http://code-camp-2018.com';
-exports.GAME_SVC_PORT_EXT = process.env.GAME_SVC_PORT || 80;
+exports.GAME_SVC_HOST_EXT = process.env.GAME_SVC_EXT_URL || 'http://code-camp-2018.com';
+exports.GAME_SVC_PORT_EXT = process.env.GAME_SVC_EXT_PORT || 80;
 exports.GAME_MON_HOST = process.env.GAME_MON_URL || 'http://monitor.code-camp.svc';
 exports.GAME_MON_PORT = process.env.GAME_MON_PORT || 80;
 // construct base URLs

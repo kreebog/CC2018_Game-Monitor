@@ -19,8 +19,8 @@ export const TEAM_SVC_PORT = process.env.TEAM_SVC_PORT || 80;
 export const GAME_SVC_HOST = process.env.GAME_SVC_URL || 'http://game-server.code-camp-2018.svc';
 export const GAME_SVC_PORT = process.env.GAME_SVC_PORT || 80;
 
-export const GAME_SVC_HOST_EXT = process.env.GAME_SVC_URL || 'http://code-camp-2018.com';
-export const GAME_SVC_PORT_EXT = process.env.GAME_SVC_PORT || 80;
+export const GAME_SVC_HOST_EXT = process.env.GAME_SVC_EXT_URL || 'http://code-camp-2018.com';
+export const GAME_SVC_PORT_EXT = process.env.GAME_SVC_EXT_PORT || 80;
 
 export const GAME_MON_HOST = process.env.GAME_MON_URL || 'http://monitor.code-camp.svc';
 export const GAME_MON_PORT = process.env.GAME_MON_PORT || 80;
