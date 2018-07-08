@@ -15,11 +15,11 @@ const log = cc2018_ts_lib_1.Logger.getInstance();
  * @param url - URL to request
  * @param callback - Callback to send response data to
  */
-function doRequest(url, callback) {
-    let fnName = util_1.format('doRequest("%s" -> "%s")', arguments[0], arguments[1].name);
-    log.trace(__filename, fnName, 'Initiating request...');
-    // make the request
-    request_1.default(url, (err, res, body) => {
+function doRequest(url, timeout, callback) {
+    let fnName = util_1.format('doRequest("%s" -> "%s")', arguments[0], arguments[1], arguments[2].name);
+    let start = Date.now();
+    log.debug(__filename, fnName, 'Initiating request.');
+    request_1.default({ uri: url, timeout: timeout }, (err, res, body) => {
         // if there's an error during request, log it and eat the response
         if (err) {
             log.error(__filename, fnName, util_1.format('Error from %s %s', url, log.getLogLevel() == Logger_1.LOG_LEVELS.TRACE ? '\n' + err.stack : err.message));
@@ -31,8 +31,17 @@ function doRequest(url, callback) {
             log.warn(__filename, fnName, util_1.format('Response Code %d (%s) recieved! Discarding response from %s', res.statusCode, res.statusMessage, url));
             return; // eat the response
         }
+        // make sure that the content type is JSON, but don't overwrite existing errors
+        let ct;
+        if (res !== undefined && res.headers !== undefined) {
+            ct = res.headers['content-type'] + '';
+            if (ct.toLowerCase() != 'application/json; charset=utf-8') {
+                err = new Error(util_1.format('Invalid Content Type [%s], expected [application/json]', ct));
+            }
+        }
         // error states managed above, apparently - fire othe callback
-        log.trace(__filename, fnName, util_1.format('Response Recieved: \nStatus: %d (%s) \nBody: ', res.statusCode, res.statusMessage, body));
+        log.debug(__filename, fnName, util_1.format('Response %d (%s) recieved in %dms.', res.statusCode, res.statusMessage, Date.now() - start));
+        log.trace(__filename, fnName, util_1.format('Response Body\n: ', body));
         // fire the callback
         callback(res, body, err);
     });

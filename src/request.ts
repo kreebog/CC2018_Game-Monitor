@@ -12,13 +12,12 @@ const log = Logger.getInstance();
  * @param url - URL to request
  * @param callback - Callback to send response data to
  */
-export function doRequest(url: string, callback: Function) {
-    let fnName = format('doRequest("%s" -> "%s")', arguments[0], arguments[1].name);
+export function doRequest(url: string, timeout: number, callback: Function) {
+    let fnName = format('doRequest("%s" -> "%s")', arguments[0], arguments[1], arguments[2].name);
+    let start = Date.now();
+    log.debug(__filename, fnName, 'Initiating request.');
 
-    log.trace(__filename, fnName, 'Initiating request...');
-
-    // make the request
-    request(url, (err, res, body) => {
+    request({ uri: url, timeout: timeout }, (err, res, body) => {
         // if there's an error during request, log it and eat the response
         if (err) {
             log.error(__filename, fnName, format('Error from %s %s', url, log.getLogLevel() == LOG_LEVELS.TRACE ? '\n' + err.stack : err.message));
@@ -32,8 +31,18 @@ export function doRequest(url: string, callback: Function) {
             return; // eat the response
         }
 
+        // make sure that the content type is JSON, but don't overwrite existing errors
+        let ct: string;
+        if (res !== undefined && res.headers !== undefined) {
+            ct = res.headers['content-type'] + '';
+            if (ct.toLowerCase() != 'application/json; charset=utf-8') {
+                err = new Error(format('Invalid Content Type [%s], expected [application/json]', ct));
+            }
+        }
+
         // error states managed above, apparently - fire othe callback
-        log.trace(__filename, fnName, format('Response Recieved: \nStatus: %d (%s) \nBody: ', res.statusCode, res.statusMessage, body));
+        log.debug(__filename, fnName, format('Response %d (%s) recieved in %dms.', res.statusCode, res.statusMessage, Date.now() - start));
+        log.trace(__filename, fnName, format('Response Body\n: ', body));
 
         // fire the callback
         callback(res, body, err);
