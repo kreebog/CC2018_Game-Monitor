@@ -34,7 +34,7 @@ html(lang='en')
         .col-md-3.col-sm-6.mb-4
           a.btn(onClick='$("#mazeView").text("' + game.team.name + " in " + game.mazeStub.seed + '")')
             .card.bg-secondary.text-center(style='border:solid 1px black; width:200px;')
-              img.card-img-top(src='/views/images/fire_logo_150.png' alt='Team Fire!' style='width:50%;margin-right:auto;margin-left:auto;margin-top:3px')
+              img.card-img-top(src='/views/images/' + game.team.logo alt='Team Logo' style='width:50%;margin-right:auto;margin-left:auto;margin-top:3px')
               h4.card-title.align-middle.text-white.font-weight-bold(style='text-shadow:2px 2px #222') #{game.team.name}
               .card-body.bg-danger(style='border:solid 1px black')
                 p.card-text.text-white(style='text-shadow:1px 1px #222') #{game.mazeStub.seed}
