@@ -10,7 +10,7 @@ html(lang='en')
     // Portfolio Item Row
     .row
       .col-md-8
-        pre.p-1.bg-dark.text-white(style="width:100%;height:100%;border:solid 1px #CCC") ... Maze view goes here?  
+        pre.p-1.bg-dark.text-white(id='mazeView' style="width:100%;height:100%;border:solid 1px #CCC") ... Maze view goes here?  
       .col-md-4
         h3.my-3 What is a Maze?
         p
@@ -32,7 +32,7 @@ html(lang='en')
     .row
       each game in games
         .col-md-3.col-sm-6.mb-4
-          a.btn(href=game.url)
+          a.btn(onClick='$("#mazeView").text("' + game.team.name + " in " + game.mazeStub.seed + '")')
             .card.bg-secondary.text-center(style='border:solid 1px black; width:200px;')
               img.card-img-top(src='/views/images/fire_logo_150.png' alt='Team Fire!' style='width:50%;margin-right:auto;margin-left:auto;margin-top:3px')
               h4.card-title.align-middle.text-white.font-weight-bold(style='text-shadow:2px 2px #222') #{game.team.name}
