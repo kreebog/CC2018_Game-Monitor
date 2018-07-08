@@ -68,13 +68,22 @@ function startServer() {
                 games: gameStubs
             });
         });
+        // handle the game server test page
+        app.get('/testing/:gameId', function (req, res) {
+            log.error(__filename, 'Testing', 'RP:' + req.params.gameId);
+            res.render('testing', {
+                contentType: 'text/html',
+                responseCode: 200,
+                host: req.headers.host
+            });
+        });
         // handle favicon requests
         app.get('/favicon.ico', (req, res) => {
             res.status(200).sendFile(path_1.default.resolve('./views/favicon.ico'));
         });
         // handle images, css, and js file requests
-        app.get(['/images/:file', '/css/:file', '/js/:file'], function (req, res) {
-            res.sendFile(path_1.default.resolve('./views' + req.path));
+        app.get(['/views/images/:file', '/views/css/:file', '/views/js/:file'], function (req, res) {
+            res.sendFile(path_1.default.resolve('.' + req.path));
         });
         // handle root URL with redirect to /index
         app.get('/', function (req, res) {
@@ -87,7 +96,7 @@ function startServer() {
                 contentType: 'text/html',
                 responseCode: 404,
                 host: req.headers.host,
-                image: util_1.format('/images/404_%d.jpg', Math.floor(Math.random() * Math.floor(7)) + 1),
+                image: util_1.format('/views/images/404_%d.jpg', Math.floor(Math.random() * Math.floor(7)) + 1),
                 title: 'Page Not Found'
             });
         });
@@ -107,7 +116,7 @@ function refreshGameStubsCache() {
         }
         else {
             gameStubs = JSON.parse(body);
-            dumpArray(gameStubs, 'id');
+            dumpArray(gameStubs, 'gameId');
         }
         lastGameStubsRefresh = Date.now();
         log.debug(__filename, 'cb_refreshGameStubsCache()', util_1.format('gameStubs Cache Updated: %s game stubs loaded.', gameStubs.length));
