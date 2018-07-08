@@ -75,7 +75,7 @@ function startServer() {
             res.render('live', {
                 host: req.headers.host,
                 games: gameStubs,
-                gamesUrl: consts.GAME_SVC_URL + '/games'
+                gamesUrl: consts.GAME_SVC_URL_EXT + '/games'
             });
         });
 
