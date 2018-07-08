@@ -75,16 +75,6 @@ function startServer() {
             });
         });
 
-        // handle the game server test page
-        app.get('/testing/:gameId', function(req, res) {
-            log.error(__filename, 'Testing', 'RP:' + req.params.gameId);
-            res.render('testing', {
-                contentType: 'text/html',
-                responseCode: 200,
-                host: req.headers.host
-            });
-        });
-
         // handle favicon requests
         app.get('/favicon.ico', (req, res) => {
             res.status(200).sendFile(path.resolve('./views/favicon.ico'));
@@ -100,7 +90,7 @@ function startServer() {
             res.redirect('/index');
         });
 
-        // Catch all - return 404
+        // Catch all - return 404/
         app.get('/*', function(req, res) {
             log.trace(__filename, req.url, 'Route not found, returning 404.');
             res.render('404', {
