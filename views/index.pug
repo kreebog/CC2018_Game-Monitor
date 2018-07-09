@@ -5,28 +5,78 @@ html(lang='en')
   // Page Content
   .container
     // Portfolio Item Heading
-    h1.my-4(id='viewTitle')
-      | Game Monitor
-      small Select a Game
+    h1.my-4(id='viewTitle') Game Monitor
     // Portfolio Item Row
     .row
       .col-md-8
-        div.no-gutters(id='vpGame') ... Maze view goes here?  
+        div.no-gutters(id='vpGame') 
+          h5 Please select a game from the list below to get started.
       .col-md-4
-        h3.my-3 What is a Maze?
-        p
-          |A maze is a path or collection of paths, typically from an entrance to a goal.
-          |The word is used to refer both to branching tour puzzles through which the solver must find a route,
-          |and to simpler non-branching ("unicursal") patterns that lead unambiguously through a convoluted layout to a goal.
-          |(The term "labyrinth" is generally synonymous with "maze", but can also connote specifically a unicursal pattern.)
-          |The pathways and walls in a maze are typically fixed, but puzzles in which the walls and paths can change during the
-          |game are also categorised as mazes or tour puzzles.
-        h3.my-3 Code Camp Details
-        ul
-          li Much Maze!
-          li Many Fun!
-          li Lots Challenge!
-          li Very A.I.!
+        h3.my-3 Activity
+        table.table.table-sm.table-dark.small.text-center(id='curGameActivity')
+          th(scope='col') Move
+          th(scope='col') Action
+          th(scope='col') Cohesion
+          th(scope='col') Result
+          tr
+            td 1
+            td
+              h1.badge.badge-primary.badge-warning South
+            td
+              h1.badge.badge-success B1
+              h1.badge.badge-danger B2
+              h1.badge.badge-success B3
+              h1.badge.badge-danger B4
+              h1.badge.badge-success B5
+            td 
+              h1.badge.badge-success OK
+          tr
+            td 2
+            td 
+              h1.badge.badge-primary.badge-warning East
+            td 
+              h1.badge.badge-secondary B1
+              h1.badge.badge-success B2
+              h1.badge.badge-success B3
+              h1.badge.badge-warning B4
+              h1.badge.badge-success B5
+            td 
+              h1.badge.badge-warning FALL
+          tr
+            td 3
+            td 
+              h1.badge.badge-primary.badge-success Stand Up
+            td 
+              h1.badge.badge-success B1
+              h1.badge.badge-success B2
+              h1.badge.badge-success B3
+              h1.badge.badge-success B4
+              h1.badge.badge-success B5
+            td 
+              h1.badge.badge-success OK
+          tr
+            td 4
+            td 
+              h1.badge.badge-primary.badge-danger West
+            td 
+              h1.badge.badge-warning B1
+              h1.badge.badge-secondary B2
+              h1.badge.badge-warning B3
+              h1.badge.badge-warning B4
+              h1.badge.badge-secondary B5
+            td 
+              h1.badge.badge-success OK
+        h3.my-3 Current Score
+        table.table.table-dark.text-center.font-weight-bold(id='curGameScore')
+            th(scope='col') Round
+            th(scope='col') Moves
+            th(scope='col') Backtracks
+            th(scope='col') Bonus
+            tr
+              td 1
+              td 3
+              td 0
+              td -2
     // /.row
     // Related Projects Row
     h3.my-4 Current Games
@@ -62,12 +112,15 @@ html(lang='en')
               '</div>');
             });
 
-            if (curGame.gameId == 0) selectGame(gamesList[1].gameId, gamesList[1].url);
+            if(curGame.gameId == 0) {
+              selectGame(gamesList[0].gameId, gamesList[0].url);
+            }
         }});
       });
     }
 
     function selectGame(gameId, gameUrl) {
+      console.log('Game Selected: ', gameId);
       if (curGame.gameId == gameId) {
         console.log('Game %s already loaded.', gameId);
         return;
@@ -132,12 +185,9 @@ html(lang='en')
           if (!!(cell.tags & 2)) cDiv.addClass('finish');
           
           if (!!(cell.tags & 4) && !(cell.tags & 1) && !(cell.tags & 2)) cDiv.addClass('path');
-          
+
         }
       }
-
-
-
     }
 
     // need to populate the list
