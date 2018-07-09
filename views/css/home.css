@@ -7,3 +7,31 @@ body {
         padding-top: 56px;
     }
 }
+
+.cell {
+    position: absolute;
+    border: solid 1px lightgray;
+    border-style: dashed;
+    background-color: #efefef;
+    /*    content: url('/views/images/stone_gray_1.png'); */
+}
+
+.path {
+    background-color: #ddddff;
+}
+
+.start {
+    background-color: lightgreen;
+}
+
+.finish {
+    background-color: lightcoral;
+}
+
+#vpGame {
+    height: 550px;
+    width: 730px;
+    border: none;
+    padding: 0px;
+    margin: 0px;
+}

@@ -20,7 +20,6 @@ const compression_1 = __importDefault(require("compression"));
 // **** App Imports **** //
 const cc2018_ts_lib_1 = require("cc2018-ts-lib");
 const consts = __importStar(require("./consts"));
-const Logger_1 = require("cc2018-ts-lib/dist/Logger");
 // **** Initialize **** //
 let httpServer; // set by app.listen
 const enums = cc2018_ts_lib_1.Enums.getInstance(); // instance of shared enum-related helper module
@@ -34,17 +33,11 @@ app.set('views', 'views');
 app.set('view engine', 'pug');
 // caches for games and game stub data
 let games = new Array();
-let gameStubs = new Array();
-let hndGameStubRefreshTimer;
 // now start the server
 startServer();
 /* END OF SETUP SECTION */
 function startServer() {
     log.info(__filename, 'startServer()', 'Starting Game Monitor v' + consts.APP_VERSION);
-    //initial cache load
-    refreshGameStubsCache();
-    // set auto cache refresh timer
-    hndGameStubRefreshTimer = setInterval(refreshGameStubsCache, consts.GAME_STUBS_CACHE_TTL);
     // start the http server
     httpServer = app.listen(consts.GAME_MON_PORT, function () {
         log.info(__filename, 'startServer()', util_1.format('Game Monitor is listening on port %d', consts.GAME_MON_PORT));
@@ -60,14 +53,10 @@ function startServer() {
         });
         // handle index page request
         app.get(['/', '/index'], function (req, res) {
-            res.render('index', { host: req.headers.host, games: gameStubs });
-        });
-        // handle index page request
-        app.get(['/live'], function (req, res) {
-            res.render('live', {
+            res.render('index', {
                 host: req.headers.host,
-                games: gameStubs,
-                gamesUrl: consts.GAME_SVC_URL_EXT + '/games'
+                gamesUrl: consts.GAME_SVC_URL_EXT + '/games',
+                gamesListRefreshRate: consts.GAME_LIST_REFRESH_RATE
             });
         });
         // handle images, css, and js file requests
@@ -92,26 +81,20 @@ function startServer() {
     });
 }
 /**
- * Refreshes the local gameStubs cache array and resets the cache fill time.
- * Called once during service start, then again whenever a request comes in
- * if the cache expiration time is exceeded (consts.GAMES_LIST_CACHE_TTL)
+ * dead code.. left as sample for now
+ * TODO: CLEAN UP!
  */
+// doRequest(url, timeout, callback)
 function refreshGameStubsCache() {
-    ReqMaker.doRequest(consts.GAME_SVC_URL + '/games', consts.GAME_STUBS_CACHE_TTL / 2, function cb_refreshGameStubsCache(res, body, err) {
+    ReqMaker.doRequest(consts.GAME_SVC_URL + '/games', consts.GAME_LIST_REFRESH_RATE / 2, function cb_refreshGameStubsCache(res, body, err) {
         // check for Response Code 204 (No Content)
         if (res.statusCode == 204) {
-            gameStubs = new Array();
+            //gameStubs = new Array<IGameStub>();
             log.debug(__filename, 'cb_refreshGameStubsCache()', util_1.format('No active games were found.'));
         }
-        else {
-            gameStubs = JSON.parse(body);
-            if (log.getLogLevel() == Logger_1.LOG_LEVELS.TRACE)
-                dumpArray(gameStubs, 'gameId');
-        }
-        log.debug(__filename, 'cb_refreshGameStubsCache()', util_1.format('gameStubs Cache Updated: %s game stubs loaded.', gameStubs.length));
+        //log.debug(__filename, 'cb_refreshGameStubsCache()', format('gameStubs Cache Updated: %s game stubs loaded.', gameStubs.length));
     });
 }
-/** DEBUG / TRACE FUNCTIONS HERE **/
 /**
  * Useful debug tool - dumps key/val array to debug/trace logs
  *
@@ -123,11 +106,12 @@ function dumpArray(list, key) {
         log.trace(__filename, 'dumpArray()', JSON.stringify(item));
     });
 }
-/** GRACEFUL SHUTDOWN / CLEANUP FUNCTIONS **/
+// respond to process interrupt signals
 process.on('SIGINT', function onSigInt() {
     log.info(__filename, 'onSigInt()', 'Got SIGINT - Exiting applicaton...');
     doShutdown();
 });
+// respond to process terminiation signals
 process.on('SIGTERM', function onSigTerm() {
     log.info(__filename, 'onSigTerm()', 'Got SIGTERM - Exiting applicaton...');
     doShutdown();
@@ -139,6 +123,5 @@ function doShutdown() {
     log.info(__filename, 'doShutDown()', 'Closing HTTP Server connections...');
     httpServer.close();
     log.info(__filename, 'doShutDown()', 'Stoping timers...');
-    clearInterval(hndGameStubRefreshTimer);
 }
 //# sourceMappingURL=server.js.map

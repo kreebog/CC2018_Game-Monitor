@@ -1,44 +1,211 @@
 doctype html
-include head.pug
 html(lang='en')
+  head
+    include head.pug
   // Page Content
   .container
     // Portfolio Item Heading
-    h1.my-4
-      | Game Monitor
-      small - Isn't it Great?
+    h1.my-4(id='viewTitle') Game Monitor
     // Portfolio Item Row
     .row
       .col-md-8
-        pre.p-1.bg-dark.text-white(id='mazeView' style="width:100%;height:100%;border:solid 1px #CCC") ... Maze view goes here?  
+        div.no-gutters(id='vpGame') 
+          h5 Please select a game from the list below to get started.
       .col-md-4
-        h3.my-3 What is a Maze?
-        p
-          |A maze is a path or collection of paths, typically from an entrance to a goal.
-          |The word is used to refer both to branching tour puzzles through which the solver must find a route,
-          |and to simpler non-branching ("unicursal") patterns that lead unambiguously through a convoluted layout to a goal.
-          |(The term "labyrinth" is generally synonymous with "maze", but can also connote specifically a unicursal pattern.)
-          |The pathways and walls in a maze are typically fixed, but puzzles in which the walls and paths can change during the
-          |game are also categorised as mazes or tour puzzles.
-        h3.my-3 Code Camp Details
-        ul
-          li Much Maze!
-          li Many Fun!
-          li Lots Challenge!
-          li Very A.I.!
+        h3.my-3 Activity
+        table.table.table-sm.table-dark.small.text-center(id='curGameActivity')
+          th(scope='col') Move
+          th(scope='col') Action
+          th(scope='col') Cohesion
+          th(scope='col') Result
+          tr
+            td 1
+            td
+              h1.badge.badge-primary.badge-warning South
+            td
+              h1.badge.badge-success B1
+              h1.badge.badge-danger B2
+              h1.badge.badge-success B3
+              h1.badge.badge-danger B4
+              h1.badge.badge-success B5
+            td 
+              h1.badge.badge-success OK
+          tr
+            td 2
+            td 
+              h1.badge.badge-primary.badge-warning East
+            td 
+              h1.badge.badge-secondary B1
+              h1.badge.badge-success B2
+              h1.badge.badge-success B3
+              h1.badge.badge-warning B4
+              h1.badge.badge-success B5
+            td 
+              h1.badge.badge-warning FALL
+          tr
+            td 3
+            td 
+              h1.badge.badge-primary.badge-success Stand Up
+            td 
+              h1.badge.badge-success B1
+              h1.badge.badge-success B2
+              h1.badge.badge-success B3
+              h1.badge.badge-success B4
+              h1.badge.badge-success B5
+            td 
+              h1.badge.badge-success OK
+          tr
+            td 4
+            td 
+              h1.badge.badge-primary.badge-danger West
+            td 
+              h1.badge.badge-warning B1
+              h1.badge.badge-secondary B2
+              h1.badge.badge-warning B3
+              h1.badge.badge-warning B4
+              h1.badge.badge-secondary B5
+            td 
+              h1.badge.badge-success OK
+        h3.my-3 Current Score
+        table.table.table-dark.text-center.font-weight-bold(id='curGameScore')
+            th(scope='col') Round
+            th(scope='col') Moves
+            th(scope='col') Backtracks
+            th(scope='col') Bonus
+            tr
+              td 1
+              td 3
+              td 1
+              td -2
     // /.row
     // Related Projects Row
     h3.my-4 Current Games
-    .row
-      each game in games
-        .col-md-3.col-sm-6.mb-4
-          a.btn(onClick='$("#mazeView").text("' + game.team.name + " in " + game.mazeStub.seed + '")')
-            .card.bg-secondary.text-center(style='border:solid 1px black; width:200px;')
-              img.card-img-top(src='/views/images/' + game.team.logo alt='Team Logo' style='width:50%;margin-right:auto;margin-left:auto;margin-top:3px')
-              h4.card-title.align-middle.text-white.font-weight-bold(style='text-shadow:2px 2px #222') #{game.team.name}
-              .card-body.bg-danger(style='border:solid 1px black')
-                p.card-text.text-white(style='text-shadow:1px 1px #222') #{game.mazeStub.seed}
-    // /.row
-  // /.container
+    .row(id='games')
   // Footer
   include foot.pug
+  
+  // AJAX functions go here...
+  script.
+    // stores the current games list 
+    let gamesList = new Array();
+    let curGame = {gameId:0};
+
+    // refreshes the current games list
+    function refreshGames() {
+        $(document).ready(function() {
+        $.ajax({url: '!{gamesUrl}', success: function(result) {
+            gamesList = result;
+            $('#games').html('');
+            gamesList.forEach( function(game, index) { 
+              $('#games').append('<div class="col-md-3 col-sm-6 mb-4">' +
+              '   <a class="btn" onclick="selectGame(&quot;' + game.gameId + '&quot, &quot;' + game.url + '&quot;)">' + 
+              '      <div class="card bg-secondary text-center" style="border:solid 1px black; width:200px;">' + 
+              '         <img class="card-img-top" src="/views/images/' + game.team.logo + '" alt="Team Card" style="width:50%;margin-right:auto;margin-left:auto;margin-top:3px">' + 
+              '         <h4 class="card-title align-middle text-white font-weight-bold" style="text-shadow:2px 2px #222">' + game.team.name + '</h4>' + 
+              '         <div class="card-body bg-danger" style="border:solid 1px black">' + 
+              '            <p class="card-text text-white m-0 font-weight-bold" style="text-shadow:1px 1px #222">' + game.mazeStub.seed + '</p>' + 
+              '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Round: ' + game.score.gameRound + '</p>' + 
+              '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Moves: ' + game.score.moveCount + '</p>' + 
+              '         </div>' + 
+              '      </div>' + 
+              '   </a>' + 
+              '</div>');
+            });
+
+            if(curGame.gameId == 0) {
+              selectGame(gamesList[0].gameId, gamesList[0].url);
+            }
+        }});
+      });
+    }
+
+    function selectGame(gameId, gameUrl) {
+      console.log('Game Selected: ', gameId);
+      if (curGame.gameId == gameId) {
+        console.log('Game %s already loaded.', gameId);
+        return;
+      } else {
+        console.log('Loading game: %s', gameId);
+
+        // make the ajax call
+        $.ajax({url: gameUrl, success: function(result) {
+            curGame = result;
+            renderGame();
+        }});
+      }
+    }
+
+    function calcCellSize() {
+      let divHt = parseInt($('#vpGame').css('height'));
+      let divWd = parseInt($('#vpGame').css('width'));
+      let cHt = divHt / (parseInt(curGame.maze.height) + 1);
+      let cWd = divWd / (parseInt(curGame.maze.width) + 1);
+      let cSz = Math.round(cHt < cWd ? cHt : cWd);
+
+      console.log ('DH: %d, DW: %d, CH: %d, CW: %d CS: %d', divHt, divWd, cHt, cWd, cSz);
+      return cSz;
+    }
+
+    function renderGame() {
+      let cells = curGame.maze.cells;
+      let cSz = calcCellSize();
+      let cTxt ='';
+      let cLeftOffset = Math.floor((parseInt($('#vpGame').css('width')) / 2) - ((cSz * (parseInt(curGame.maze.width) - 2)) / 2));
+      let cTopOffset = Math.floor((parseInt($('#vpGame').css('height')) / 2) - ((cSz * (parseInt(curGame.maze.height))) / 2));
+
+      let cTop = cTopOffset;
+      let cLeft = cLeftOffset;
+
+      $('#viewTitle').html(curGame.team.name + ' in ' + curGame.maze.seed);
+
+      for (row = 0; row < cells.length; row++) {
+        for (col = 0; col < cells[0].length; col++) {
+          let cId = row + 'x' + col;
+          cTxt += '<div id="' + cId + '" class="cell row no-gutters" style="top:' + cTop + 'px; left:' + cLeft + 'px; height:' + cSz + 'px; width:' + cSz + 'px;"></div>';
+          cLeft += cSz;
+        }
+        cTop += cSz;
+        cLeft = cLeftOffset;
+      }
+
+      $('#vpGame').html(cTxt);
+
+      let wallWidth = Math.round(20 / (cells.length > cells[0].length ? cells.length : cells[0].length)) + 1;
+      for (row = 0; row < cells.length; row++) {
+        for (col = 0; col < cells[0].length; col++) {
+          let cell = cells[row][col];
+          let cDiv = $('#' + row + 'x' + col);
+
+          if (!(cell.exits & 1)) cDiv.css('border-top', 'solid black ' + wallWidth + 'px');
+          if (!(cell.exits & 2)) cDiv.css('border-bottom', 'solid black ' + wallWidth + 'px');
+          if (!(cell.exits & 4)) cDiv.css('border-right', 'solid black ' + wallWidth + 'px');
+          if (!(cell.exits & 8)) cDiv.css('border-left', 'solid black ' + wallWidth + 'px');
+
+          if (!!(cell.tags & 1)) cDiv.addClass('start');
+          if (!!(cell.tags & 2)) cDiv.addClass('finish');
+          
+          if (!!(cell.tags & 4) && !(cell.tags & 1) && !(cell.tags & 2)) cDiv.addClass('path');
+
+        }
+      }
+    }
+
+    // need to populate the list
+    refreshGames();
+    
+    // then start the refresh timer
+    let gamesListRefreshRate = !{gamesListRefreshRate};
+    let gamesListTimer = setInterval(refreshGames, gamesListRefreshRate);
+    console.log('Current Games list refreshing every %dms.', gamesListRefreshRate);
+    
+    // change the rate at which the games list is refresshing
+    function changeGamesListRefreshRate(newInterval) {
+      if (newInterval < 1000){
+        console.log('Too fast! Try 1000 or more.  Current rate: %dms', gamesListRefreshRate);
+        return;
+      }
+      clearInterval(gamesListTimer);
+      gamesListTimer = setInterval(refreshGames, newInterval);
+      console.log('Current Games list refresh rate changed from %dms to %dms.', gamesListRefreshRate, newInterval);
+      gamesListRefreshRate = newInterval;
+    }
