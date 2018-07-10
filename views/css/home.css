@@ -8,13 +8,30 @@ body {
     }
 }
 
-.cell {
-    position: absolute;
+
+
+.maze_row {
+	border: none;
+	margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    
+
+}
+
+.maze_cell {
+    
     border: solid 1px lightgray;
     border-style: dashed;
     background-color: #efefef;
+    height: 50px;
+	width: 50px;
+	margin: 0;
+	padding: 0;
     /*    content: url('/views/images/stone_gray_1.png'); */
 }
+
 
 .path {
     background-color: #ddddff;
@@ -28,10 +45,11 @@ body {
     background-color: lightcoral;
 }
 
-#vpGame {
-    height: 550px;
-    width: 730px;
-    border: none;
-    padding: 0px;
-    margin: 0px;
+
+#maze_container {
+	padding: 0;
+    margin: 0;
+    max-width: 100%;
+    display: inline-block;
+    margin-left: 25px;
 }

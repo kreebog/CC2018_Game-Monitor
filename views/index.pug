@@ -8,10 +8,9 @@ html(lang='en')
     h1.my-4(id='viewTitle') Game Monitor
     // Portfolio Item Row
     .row
-      .col-md-8
-        div.no-gutters(id='vpGame') 
-          h5.my-5 Please select a game from the list below to get started.
-      .col-md-4
+      div.col-md-8(id='main')
+        h5 Please select a game from the list below to get started.
+      .col-md-4(id='game_action')
         h3.my-3 Activity
         table.table.table-sm.table-dark.small.text-center(id='curGameActivity')
           th(scope='col') Move
@@ -79,14 +78,13 @@ html(lang='en')
               td -2
     // /.row
     // Related Projects Row
-    h3.my-4 Current Games
-      h5.my-5(id='noGamesInProgress') No games currently in progress.
+    h3.my-4(id='games_header') Current Games
     .row(id='games')
-
   // Footer
   include foot.pug
   
   // AJAX functions go here...
+  script(src='/views/js/resize.js')
   script.
     // stores the current games list 
     let gamesList = new Array();
@@ -95,44 +93,27 @@ html(lang='en')
     // refreshes the current games list
     function refreshGames() {
         $(document).ready(function() {
-        $.ajax({url: '!{gamesUrl}', timeout: gamesListRefreshRate - 250, success: function(result) {
-            // clear the games list container
+        $.ajax({url: '!{gamesUrl}', success: function(result) {
+            gamesList = result;
             $('#games').html('');
-            
-            // load the result - if it's empty/undefined set a notification, otherwise load the list
-            console.log(JSON.stringify(status));
-            if (!result || result === undefined || result.status) {
-              
-              // no games running, clear the list and reset the curGame id to 0
-              if (gamesList.length > 0) gamesList = new Array();
-              if (curGame.gameId != 0) curGame={gameId:0};
-              
-              // reset the UI elements
-              $('#noGamesInProgress').show();
-              $('#vpGame').html('<h5 class="my-5">Please select a game from the list below to get started.</h5>');
+            gamesList.forEach( function(game, index) { 
+              $('#games').append('<div class="col-md-3 col-sm-6 mb-4">' +
+              '   <a class="btn" onclick="selectGame(&quot;' + game.gameId + '&quot, &quot;' + game.url + '&quot;)">' + 
+              '      <div class="card bg-secondary text-center" style="border:solid 1px black; width:200px;">' + 
+              '         <img class="card-img-top" src="/views/images/' + game.team.logo + '" alt="Team Card" style="width:50%;margin-right:auto;margin-left:auto;margin-top:3px">' + 
+              '         <h4 class="card-title align-middle text-white font-weight-bold" style="text-shadow:2px 2px #222">' + game.team.name + '</h4>' + 
+              '         <div class="card-body bg-danger" style="border:solid 1px black">' + 
+              '            <p class="card-text text-white m-0 font-weight-bold" style="text-shadow:1px 1px #222">' + game.mazeStub.seed + '</p>' + 
+              '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Round: ' + game.score.gameRound + '</p>' + 
+              '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Moves: ' + game.score.moveCount + '</p>' + 
+              '         </div>' + 
+              '      </div>' + 
+              '   </a>' + 
+              '</div>');
+            });
 
-            } else {
-              gamesList = result;
-              $('#noGamesInProgress').hide();
-              gamesList.forEach( function(game, index) { 
-                $('#games').append('<div class="col-md-3 col-sm-6 mb-4">' +
-                '   <a class="btn" onclick="selectGame(&quot;' + game.gameId + '&quot, &quot;' + game.url + '&quot;)">' + 
-                '      <div class="card bg-secondary text-center" style="border:solid 1px black; width:200px;">' + 
-                '         <img class="card-img-top" src="/views/images/' + game.team.logo + '" alt="Team Card" style="width:50%;margin-right:auto;margin-left:auto;margin-top:3px">' + 
-                '         <h4 class="card-title align-middle text-white font-weight-bold" style="text-shadow:2px 2px #222">' + game.team.name + '</h4>' + 
-                '         <div class="card-body bg-danger" style="border:solid 1px black">' + 
-                '            <p class="card-text text-white m-0 font-weight-bold" style="text-shadow:1px 1px #222">' + game.mazeStub.seed + '</p>' + 
-                '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Round: ' + game.score.gameRound + '</p>' + 
-                '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Moves: ' + game.score.moveCount + '</p>' + 
-                '         </div>' + 
-                '      </div>' + 
-                '   </a>' + 
-                '</div>');
-              });
-
-              if(curGame.gameId == 0 && gamesList.length > 0) {
-                selectGame(gamesList[0].gameId, gamesList[0].url);
-              }
+            if(curGame.gameId == 0) {
+              selectGame(gamesList[0].gameId, gamesList[0].url);
             }
         }});
       });
@@ -154,59 +135,69 @@ html(lang='en')
       }
     }
 
-    function calcCellSize() {
-      let divHt = parseInt($('#vpGame').css('height'));
-      let divWd = parseInt($('#vpGame').css('width'));
-      let cHt = divHt / (parseInt(curGame.maze.height) + 1);
-      let cWd = divWd / (parseInt(curGame.maze.width) + 1);
-      let cSz = Math.round(cHt < cWd ? cHt : cWd);
 
-      console.log ('DH: %d, DW: %d, CH: %d, CW: %d CS: %d', divHt, divWd, cHt, cWd, cSz);
-      return cSz;
-    }
 
     function renderGame() {
+      // TODO:
+      // Where is the ajax call to refresh maze data being inserted?
+      // Where to place movement buttons?
+      // utilize scale for items in maze_container, games list 
       let cells = curGame.maze.cells;
-      let cSz = calcCellSize();
-      let cTxt ='';
-      let cLeftOffset = Math.floor((parseInt($('#vpGame').css('width')) / 2) - ((cSz * (parseInt(curGame.maze.width) - 2)) / 2));
-      let cTopOffset = Math.floor((parseInt($('#vpGame').css('height')) / 2) - ((cSz * (parseInt(curGame.maze.height))) / 2));
+      let maze_width = cells[0].length * 50 //
+      let parent_width = parseInt($('#main').css('width'));
 
-      let cTop = cTopOffset;
-      let cLeft = cLeftOffset;
+
+      let cTxt ='';
 
       $('#viewTitle').html(curGame.team.name + ' in ' + curGame.maze.seed);
 
+      // Create new maze container and insert into vpGame 
+      $('#main').html("");
+      $('#main').append('<div id="maze_container"> </div>');
+      $('#maze_container').css('width', '500px');
+      
       for (row = 0; row < cells.length; row++) {
+        // create new row
+        let div_row = document.createElement('div');
+        div_row.setAttribute("class", "maze_row");
+        $('#maze_container').append(div_row);
+        div_row.style.width = maze_width + "px";
+
         for (col = 0; col < cells[0].length; col++) {
           let cId = row + 'x' + col;
-          cTxt += '<div id="' + cId + '" class="cell row no-gutters" style="top:' + cTop + 'px; left:' + cLeft + 'px; height:' + cSz + 'px; width:' + cSz + 'px;"></div>';
-          cLeft += cSz;
-        }
-        cTop += cSz;
-        cLeft = cLeftOffset;
-      }
+          var temp = document.createElement('span');
+          temp.setAttribute("id", cId);
+          temp.setAttribute("class", "maze_cell");
+          div_row.appendChild(temp);
 
-      $('#vpGame').html(cTxt);
-
-      let wallWidth = Math.round(20 / (cells.length > cells[0].length ? cells.length : cells[0].length)) + 1;
-      for (row = 0; row < cells.length; row++) {
-        for (col = 0; col < cells[0].length; col++) {
           let cell = cells[row][col];
+
           let cDiv = $('#' + row + 'x' + col);
 
-          if (!(cell.exits & 1)) cDiv.css('border-top', 'solid black ' + wallWidth + 'px');
-          if (!(cell.exits & 2)) cDiv.css('border-bottom', 'solid black ' + wallWidth + 'px');
-          if (!(cell.exits & 4)) cDiv.css('border-right', 'solid black ' + wallWidth + 'px');
-          if (!(cell.exits & 8)) cDiv.css('border-left', 'solid black ' + wallWidth + 'px');
+          if (!(cell.exits & 1)) cDiv.css('border-top', '1px solid black ');
+          if (!(cell.exits & 2)) cDiv.css('border-bottom', '1px solid black ');
+          if (!(cell.exits & 4)) cDiv.css('border-right', '1px solid black ');
+          if (!(cell.exits & 8)) cDiv.css('border-left', '1px solid black ');
 
           if (!!(cell.tags & 1)) cDiv.addClass('start');
           if (!!(cell.tags & 2)) cDiv.addClass('finish');
           
           if (!!(cell.tags & 4) && !(cell.tags & 1) && !(cell.tags & 2)) cDiv.addClass('path');
-
+          cDiv = $('#0x0');
+          cDiv.css('width', '50px');
         }
       }
+
+      { // zoom block
+        let zoom_value = 0;
+        if (maze_width > parent_width) {
+          zoom_value = ((parent_width / maze_width)*97).toFixed(3).toString() + "%";
+        }
+        else {
+          zoom_value = "100%";
+        }
+        resizeContainer(maze_container, zoom_value);
+      } // end zoom block
     }
 
     // need to populate the list
@@ -228,3 +219,9 @@ html(lang='en')
       console.log('Current Games list refresh rate changed from %dms to %dms.', gamesListRefreshRate, newInterval);
       gamesListRefreshRate = newInterval;
     }
+
+
+    function resizeContainer(container, zoom_value = 0) {
+      container.style.zoom = zoom_value;
+    }; 
+    
