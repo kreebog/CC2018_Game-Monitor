@@ -100,6 +100,7 @@ html(lang='en')
             $('#games').html('');
             
             // load the result - if it's empty/undefined set a notification, otherwise load the list
+            console.log(JSON.stringify(status));
             if (!result || result === undefined || result.status) {
               
               // no games running, clear the list and reset the curGame id to 0
@@ -129,7 +130,7 @@ html(lang='en')
                 '</div>');
               });
 
-              if(curGame.gameId == 0) {
+              if(curGame.gameId == 0 && gamesList.length > 0) {
                 selectGame(gamesList[0].gameId, gamesList[0].url);
               }
             }
