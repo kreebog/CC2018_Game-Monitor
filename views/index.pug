@@ -10,7 +10,7 @@ html(lang='en')
     .row
       .col-md-8
         div.no-gutters(id='vpGame') 
-          h5 Please select a game from the list below to get started.
+          h5.my-5 Please select a game from the list below to get started.
       .col-md-4
         h3.my-3 Activity
         table.table.table-sm.table-dark.small.text-center(id='curGameActivity')
@@ -80,7 +80,9 @@ html(lang='en')
     // /.row
     // Related Projects Row
     h3.my-4 Current Games
+      h5.my-5(id='noGamesInProgress') No games currently in progress.
     .row(id='games')
+
   // Footer
   include foot.pug
   
@@ -93,27 +95,43 @@ html(lang='en')
     // refreshes the current games list
     function refreshGames() {
         $(document).ready(function() {
-        $.ajax({url: '!{gamesUrl}', success: function(result) {
-            gamesList = result;
+        $.ajax({url: '!{gamesUrl}', timeout: gamesListRefreshRate - 250, success: function(result) {
+            // clear the games list container
             $('#games').html('');
-            gamesList.forEach( function(game, index) { 
-              $('#games').append('<div class="col-md-3 col-sm-6 mb-4">' +
-              '   <a class="btn" onclick="selectGame(&quot;' + game.gameId + '&quot, &quot;' + game.url + '&quot;)">' + 
-              '      <div class="card bg-secondary text-center" style="border:solid 1px black; width:200px;">' + 
-              '         <img class="card-img-top" src="/views/images/' + game.team.logo + '" alt="Team Card" style="width:50%;margin-right:auto;margin-left:auto;margin-top:3px">' + 
-              '         <h4 class="card-title align-middle text-white font-weight-bold" style="text-shadow:2px 2px #222">' + game.team.name + '</h4>' + 
-              '         <div class="card-body bg-danger" style="border:solid 1px black">' + 
-              '            <p class="card-text text-white m-0 font-weight-bold" style="text-shadow:1px 1px #222">' + game.mazeStub.seed + '</p>' + 
-              '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Round: ' + game.score.gameRound + '</p>' + 
-              '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Moves: ' + game.score.moveCount + '</p>' + 
-              '         </div>' + 
-              '      </div>' + 
-              '   </a>' + 
-              '</div>');
-            });
+            
+            // load the result - if it's empty/undefined set a notification, otherwise load the list
+            if (!result || result === undefined || result.status) {
+              
+              // no games running, clear the list and reset the curGame id to 0
+              if (gamesList.length > 0) gamesList = new Array();
+              if (curGame.gameId != 0) curGame={gameId:0};
+              
+              // reset the UI elements
+              $('#noGamesInProgress').show();
+              $('#vpGame').html('<h5 class="my-5">Please select a game from the list below to get started.</h5>');
 
-            if(curGame.gameId == 0) {
-              selectGame(gamesList[0].gameId, gamesList[0].url);
+            } else {
+              gamesList = result;
+              $('#noGamesInProgress').hide();
+              gamesList.forEach( function(game, index) { 
+                $('#games').append('<div class="col-md-3 col-sm-6 mb-4">' +
+                '   <a class="btn" onclick="selectGame(&quot;' + game.gameId + '&quot, &quot;' + game.url + '&quot;)">' + 
+                '      <div class="card bg-secondary text-center" style="border:solid 1px black; width:200px;">' + 
+                '         <img class="card-img-top" src="/views/images/' + game.team.logo + '" alt="Team Card" style="width:50%;margin-right:auto;margin-left:auto;margin-top:3px">' + 
+                '         <h4 class="card-title align-middle text-white font-weight-bold" style="text-shadow:2px 2px #222">' + game.team.name + '</h4>' + 
+                '         <div class="card-body bg-danger" style="border:solid 1px black">' + 
+                '            <p class="card-text text-white m-0 font-weight-bold" style="text-shadow:1px 1px #222">' + game.mazeStub.seed + '</p>' + 
+                '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Round: ' + game.score.gameRound + '</p>' + 
+                '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Moves: ' + game.score.moveCount + '</p>' + 
+                '         </div>' + 
+                '      </div>' + 
+                '   </a>' + 
+                '</div>');
+              });
+
+              if(curGame.gameId == 0) {
+                selectGame(gamesList[0].gameId, gamesList[0].url);
+              }
             }
         }});
       });
