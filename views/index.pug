@@ -54,42 +54,6 @@ html(lang='en')
               h1.badge.badge-success B5
             td 
               h1.badge.badge-success OK
-          tr
-            td 2
-            td 
-              h1.badge.badge-primary.badge-warning East
-            td 
-              h1.badge.badge-secondary B1
-              h1.badge.badge-success B2
-              h1.badge.badge-success B3
-              h1.badge.badge-warning B4
-              h1.badge.badge-success B5
-            td 
-              h1.badge.badge-warning FALL
-          tr
-            td 3
-            td 
-              h1.badge.badge-primary.badge-success Stand Up
-            td 
-              h1.badge.badge-success B1
-              h1.badge.badge-success B2
-              h1.badge.badge-success B3
-              h1.badge.badge-success B4
-              h1.badge.badge-success B5
-            td 
-              h1.badge.badge-success OK
-          tr
-            td 4
-            td 
-              h1.badge.badge-primary.badge-danger West
-            td 
-              h1.badge.badge-warning B1
-              h1.badge.badge-secondary B2
-              h1.badge.badge-warning B3
-              h1.badge.badge-warning B4
-              h1.badge.badge-secondary B5
-            td 
-              h1.badge.badge-success OK
         h3.my-3 Current Score
         table.table.table-dark.text-center.font-weight-bold(id='curGameScore')
             th(scope='col') Round
@@ -97,10 +61,12 @@ html(lang='en')
             th(scope='col') Backtracks
             th(scope='col') Bonus
             tr
-              td 1
-              td 3
-              td 1
-              td -2
+              td(id='curGame_round') 0
+              td(id='curGame_moves') 0
+              td(id='curGame_backtracks') 0
+              td(id='curGame_bonus') 0
+        h3.my-3 Move Result
+        p(id='curGame_outcomes') test content area
     // /.row
     // Related Projects Row
     h3.my-4(id='games_header') Current Games
@@ -117,11 +83,36 @@ html(lang='en')
 
     // load button event handlers
     var nodes = document.getElementById('curMovement').querySelectorAll('button');
+    var baseUrl = 'http://game.code-camp-2018.com/game/action/';
     for(var i = 0 ; i < nodes.length ; i++) {
+      let actionUrl = '?act=look&dir=none';
+
+      if (nodes[i].id == 'btn_move_N') actionUrl = '?act=move&dir=north';
+      if (nodes[i].id == 'btn_move_S') actionUrl = '?act=move&dir=south';
+      if (nodes[i].id == 'btn_move_E') actionUrl = '?act=move&dir=east';
+      if (nodes[i].id == 'btn_move_W') actionUrl = '?act=move&dir=west';
+      if (nodes[i].id == 'btn_look_N') actionUrl = '?act=look&dir=north';
+      if (nodes[i].id == 'btn_look_S') actionUrl = '?act=look&dir=south';
+      if (nodes[i].id == 'btn_look_E') actionUrl = '?act=look&dir=east';
+      if (nodes[i].id == 'btn_look_W') actionUrl = '?act=look&dir=west';
 
       nodes[i].addEventListener('click', function() {
-        alert('You clicked ' + this.textContent + ", id=" + this.id);
+        $.ajax({url: baseUrl +  curGame.id + actionUrl, success: function(result) { 
+            console.log(result);
+            let locId = '#' + result.location.row + 'x' + result.location.col;
+            $(locId).text('X');
+
+            $('#curGame_round').html(result.score.gameRound);
+            $('#curGame_moves').html(result.score.moveCount);
+            $('#curGame_backtracks').html(result.score.backtrackCount);
+            $('#curGame_bonus').html(result.score.bonusPoints);
+            if (result.outcome !== undefined) $('#curGame_outcomes').html(result.outcome.join('<br>'));
+          } 
+        });
+        
+        console.log('You clicked ' + this.textContent + ", id=" + this.id);
       });
+
     }
     
 
