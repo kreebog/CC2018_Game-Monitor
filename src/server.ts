@@ -59,7 +59,7 @@ function startServer() {
 
         // live / readiness probes hit this
         app.get('/live', function (req, res) {
-            log.info(__filename, req.url, 'Liveness probe.');
+            log.debug(__filename, req.url, 'Liveness probe.');
             res.status(200).send();
         });
 
