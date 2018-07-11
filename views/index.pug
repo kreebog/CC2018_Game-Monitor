@@ -11,6 +11,31 @@ html(lang='en')
       div.col-md-8(id='main')
         h5 Please select a game from the list below to get started.
       .col-md-4(id='game_action')
+        
+        table.table.table-sm.table-dark.small.text-center(id='curMovement')
+          th(scope='col') Movement Actions
+          tr
+            td
+              div(id="movementBtnGroupUp")
+                button(class='movement_btns' id='btn_Jump_N') J
+                button(class='movement_btns' id='btn_move_N') M
+                button(class='movement_btns' id='btn_look_N') L
+                div &#11245;
+              div(style="display: flex; justify-content: center;")
+                div(id="movementBtnGroupLeft")
+                  button(class='movement_btns' id='btn_Jump_W') J
+                  button(class='movement_btns' id='btn_move_W') M
+                  button(class='movement_btns' id='btn_look_W') L
+                  div &#11244;
+                div(id="movementBtnGroupRight")
+                  div &#11246;
+                  button(class='movement_btns' id='btn_Jump_E') J
+                  button(class='movement_btns' id='btn_move_E') M
+                  button(class='movement_btns' id='btn_look_E') L
+              div(id="movementBtnGroupDown") &#11247;
+                button(class='movement_btns' id='btn_Jump_S') J
+                button(class='movement_btns' id='btn_move_S') M
+                button(class='movement_btns' id='btn_look_S') L
         h3.my-3 Activity
         table.table.table-sm.table-dark.small.text-center(id='curGameActivity')
           th(scope='col') Move
@@ -90,6 +115,16 @@ html(lang='en')
     let gamesList = new Array();
     let curGame = {gameId:0};
 
+    // load button event handlers
+    var nodes = document.getElementById('curMovement').querySelectorAll('button');
+    for(var i = 0 ; i < nodes.length ; i++) {
+
+      nodes[i].addEventListener('click', function() {
+        alert('You clicked ' + this.textContent + ", id=" + this.id);
+      });
+    }
+    
+
     // refreshes the current games list
     function refreshGames() {
         $(document).ready(function() {
@@ -141,7 +176,7 @@ html(lang='en')
       // TODO:
       // Where is the ajax call to refresh maze data being inserted?
       // Where to place movement buttons?
-      // utilize scale for items in maze_container, games list 
+      // utilize scale for items in games list 
       let cells = curGame.maze.cells;
       let maze_width = cells[0].length * 50 //
       let parent_width = parseInt($('#main').css('width'));
@@ -183,21 +218,18 @@ html(lang='en')
           if (!!(cell.tags & 2)) cDiv.addClass('finish');
           
           if (!!(cell.tags & 4) && !(cell.tags & 1) && !(cell.tags & 2)) cDiv.addClass('path');
-          cDiv = $('#0x0');
-          cDiv.css('width', '50px');
+
         }
       }
-
-      { // zoom block
-        let zoom_value = 0;
+        let zoom_value;
         if (maze_width > parent_width) {
-          zoom_value = ((parent_width / maze_width)*97).toFixed(3).toString() + "%";
+          zoom_value = ((parent_width / maze_width)*90).toFixed(6).toString() + "%";
         }
         else {
           zoom_value = "100%";
-        }
-        resizeContainer(maze_container, zoom_value);
-      } // end zoom block
+        }        
+        resizeContainer(document.getElementById('maze_container'), zoom_value);
+
     }
 
     // need to populate the list
@@ -222,6 +254,7 @@ html(lang='en')
 
 
     function resizeContainer(container, zoom_value = 0) {
+
       container.style.zoom = zoom_value;
     }; 
     
