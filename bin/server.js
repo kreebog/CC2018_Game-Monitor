@@ -51,6 +51,11 @@ function startServer() {
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
             next(); // forces server to look for next route
         });
+        // live / readiness probes hit this
+        app.get('/live', function (req, res) {
+            log.info(__filename, req.url, 'Liveness probe.');
+            res.status(200).send();
+        });
         // handle index page request
         app.get(['/', '/index'], function (req, res) {
             res.render('index', {
