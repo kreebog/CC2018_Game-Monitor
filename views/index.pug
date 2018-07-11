@@ -107,6 +107,7 @@ html(lang='en')
             $('#curGame_backtracks').html(result.score.backtrackCount);
             $('#curGame_bonus').html(result.score.bonusPoints);
             if (result.outcome !== undefined) $('#curGame_outcomes').html(result.outcome.join('<br>'));
+            if (result.engram !== undefined) $('#curGame_outcomes').append('<br>' + result.engram.sight + '<br>' + result.engram.sound + '<br>' + result.engram.smell + '<br>' + result.engram.touch + '<br>' + result.engram.taste + '<br>');
           } 
         });
         
