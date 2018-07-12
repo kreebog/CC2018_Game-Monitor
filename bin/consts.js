@@ -33,7 +33,7 @@ exports.GAME_MON_URL = util_1.format('%s:%s', exports.GAME_MON_HOST, exports.GAM
 exports.LOG_LEVEL = parseInt(process.env.LOG_LEVEL + '') || 3; // 3=INFO is default
 exports.APP_VERSION = getPackageVersion();
 // sets the AJAX Current Games refresh interval on HTML Pages
-exports.GAME_LIST_REFRESH_RATE = parseInt(process.env.GAME_LIST_REFRESH_RATE + '') || 3000; // 15 seconds, by default
+exports.GAME_LIST_REFRESH_RATE = parseInt(process.env.GAME_LIST_REFRESH_RATE + '') || 5000; // 15 seconds, by default
 function getPackageVersion() {
     let data = JSON.parse(fs_1.default.readFileSync(path_1.default.resolve('package.json'), 'utf8'));
     return data.version;

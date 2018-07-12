@@ -14,7 +14,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const util_1 = require("util");
-const ReqMaker = __importStar(require("./request"));
 const express_1 = __importDefault(require("express"));
 const compression_1 = __importDefault(require("compression"));
 // **** App Imports **** //
@@ -61,7 +60,8 @@ function startServer() {
             res.render('index', {
                 host: req.headers.host,
                 gamesUrl: consts.GAME_SVC_URL_EXT + '/games',
-                gamesListRefreshRate: consts.GAME_LIST_REFRESH_RATE
+                gamesListRefreshRate: consts.GAME_LIST_REFRESH_RATE,
+                baseActionUrl: consts.GAME_SVC_URL_EXT + '/game/action/'
             });
         });
         // handle images, css, and js file requests
@@ -83,32 +83,6 @@ function startServer() {
                 title: 'Page Not Found'
             });
         });
-    });
-}
-/**
- * dead code.. left as sample for now
- * TODO: CLEAN UP!
- */
-// doRequest(url, timeout, callback)
-function refreshGameStubsCache() {
-    ReqMaker.doRequest(consts.GAME_SVC_URL + '/games', consts.GAME_LIST_REFRESH_RATE / 2, function cb_refreshGameStubsCache(res, body, err) {
-        // check for Response Code 204 (No Content)
-        if (res.statusCode == 204) {
-            //gameStubs = new Array<IGameStub>();
-            log.debug(__filename, 'cb_refreshGameStubsCache()', util_1.format('No active games were found.'));
-        }
-        //log.debug(__filename, 'cb_refreshGameStubsCache()', format('gameStubs Cache Updated: %s game stubs loaded.', gameStubs.length));
-    });
-}
-/**
- * Useful debug tool - dumps key/val array to debug/trace logs
- *
- * @param list
- * @param key
- */
-function dumpArray(list, key) {
-    list.forEach(item => {
-        log.trace(__filename, 'dumpArray()', JSON.stringify(item));
     });
 }
 // respond to process interrupt signals

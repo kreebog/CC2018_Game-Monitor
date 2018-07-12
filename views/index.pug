@@ -66,82 +66,104 @@ html(lang='en')
               td(id='curGame_backtracks') 0
               td(id='curGame_bonus') 0
         h3.my-3 Move Result
-        p(id='curGame_outcomes') test content area
+        p(id='curGame_outcomes') Nothing to see here...
     // /.row
     // Related Projects Row
     h3.my-4(id='games_header') Current Games
     .row(id='games')
+      h6(style="text-indent:20px;") There are no games running at the moment, why not start one?
   // Footer
   include foot.pug
   
   // AJAX functions go here...
   script(src='/views/js/resize.js')
   script.
-    // stores the current games list 
+    
+    // set up global vars
     let gamesList = new Array();
     let curGame = {gameId:0};
+    let playerLoc = '#0x0';
+    let lastPlayerLoc = '#0x0';
+    
+
+    function getActionUrl(buttonId) {
+      let ret = '!{baseActionUrl}' + curGame.id + '?act=' + buttonId.split('_')[1] + '&dir=';
+      let dir = buttonId.substring(buttonId.length - 1);
+
+      if (dir == 'N') ret += 'north';
+      if (dir == 'S') ret += 'south';
+      if (dir == 'E') ret += 'east';
+      if (dir == 'W') ret += 'west';
+    
+    console.log(ret);
+      return ret;
+    }
 
     // load button event handlers
     var nodes = document.getElementById('curMovement').querySelectorAll('button');
-    var baseUrl = 'http://game.code-camp-2018.com/game/action/';
     for(var i = 0 ; i < nodes.length ; i++) {
-      let actionUrl = '?act=look&dir=none';
-
-      if (nodes[i].id == 'btn_move_N') actionUrl = '?act=move&dir=north';
-      if (nodes[i].id == 'btn_move_S') actionUrl = '?act=move&dir=south';
-      if (nodes[i].id == 'btn_move_E') actionUrl = '?act=move&dir=east';
-      if (nodes[i].id == 'btn_move_W') actionUrl = '?act=move&dir=west';
-      if (nodes[i].id == 'btn_look_N') actionUrl = '?act=look&dir=north';
-      if (nodes[i].id == 'btn_look_S') actionUrl = '?act=look&dir=south';
-      if (nodes[i].id == 'btn_look_E') actionUrl = '?act=look&dir=east';
-      if (nodes[i].id == 'btn_look_W') actionUrl = '?act=look&dir=west';
-
+       
       nodes[i].addEventListener('click', function() {
-        $.ajax({url: baseUrl +  curGame.id + actionUrl, success: function(result) { 
-            console.log(result);
-            let locId = '#' + result.location.row + 'x' + result.location.col;
-            $(locId).text('X');
-
+        $.ajax({url: getActionUrl(this.id), success: function(result) { 
             $('#curGame_round').html(result.score.gameRound);
             $('#curGame_moves').html(result.score.moveCount);
             $('#curGame_backtracks').html(result.score.backtrackCount);
             $('#curGame_bonus').html(result.score.bonusPoints);
             if (result.outcome !== undefined) $('#curGame_outcomes').html(result.outcome.join('<br>'));
             if (result.engram !== undefined) $('#curGame_outcomes').append('<br>' + result.engram.sight + '<br>' + result.engram.sound + '<br>' + result.engram.smell + '<br>' + result.engram.touch + '<br>' + result.engram.taste + '<br>');
+          
+            playerLoc = '#' + result.location.row + 'x' + result.location.col;
+            setPlayerLoc();
           } 
         });
         
         console.log('You clicked ' + this.textContent + ", id=" + this.id);
       });
-
     }
-    
+
+    function setPlayerLoc() {
+      $(lastPlayerLoc).html('');
+      $(playerLoc).html('@');
+
+      console.log('moving from %s to %s', lastPlayerLoc, playerLoc);
+      lastPlayerLoc = playerLoc.toString();
+    }
 
     // refreshes the current games list
     function refreshGames() {
         $(document).ready(function() {
+   
         $.ajax({url: '!{gamesUrl}', success: function(result) {
-            gamesList = result;
-            $('#games').html('');
-            gamesList.forEach( function(game, index) { 
-              $('#games').append('<div class="col-md-3 col-sm-6 mb-4">' +
-              '   <a class="btn" onclick="selectGame(&quot;' + game.gameId + '&quot, &quot;' + game.url + '&quot;)">' + 
-              '      <div class="card bg-secondary text-center" style="border:solid 1px black; width:200px;">' + 
-              '         <img class="card-img-top" src="/views/images/' + game.team.logo + '" alt="Team Card" style="width:50%;margin-right:auto;margin-left:auto;margin-top:3px">' + 
-              '         <h4 class="card-title align-middle text-white font-weight-bold" style="text-shadow:2px 2px #222">' + game.team.name + '</h4>' + 
-              '         <div class="card-body bg-danger" style="border:solid 1px black">' + 
-              '            <p class="card-text text-white m-0 font-weight-bold" style="text-shadow:1px 1px #222">' + game.mazeStub.seed + '</p>' + 
-              '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Round: ' + game.score.gameRound + '</p>' + 
-              '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Moves: ' + game.score.moveCount + '</p>' + 
-              '         </div>' + 
-              '      </div>' + 
-              '   </a>' + 
-              '</div>');
-            });
+            if (result.status === undefined && result.length > 0) {
+              gamesList = result;
+              $('#games').html('');
+              gamesList.forEach( function(game, index) { 
+                $('#games').append('<div class="col-md-3 col-sm-6 mb-4">' +
+                '   <a class="btn" onclick="selectGame(&quot;' + game.gameId + '&quot, &quot;' + game.url + '&quot;)">' + 
+                '      <div class="card bg-secondary text-center" style="border:solid 1px black; width:200px;">' + 
+                '         <img class="card-img-top" src="/views/images/' + game.team.logo + '" alt="Team Card" style="width:50%;margin-right:auto;margin-left:auto;margin-top:3px">' + 
+                '         <h4 class="card-title align-middle text-white font-weight-bold" style="text-shadow:2px 2px #222">' + game.team.name + '</h4>' + 
+                '         <div class="card-body bg-danger" style="border:solid 1px black">' + 
+                '            <p class="card-text text-white m-0 font-weight-bold" style="text-shadow:1px 1px #222">' + game.mazeStub.seed + '</p>' + 
+                '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Round: ' + game.score.gameRound + '</p>' + 
+                '            <p class="card-text text-white m-0" style="text-shadow:1px 1px #222">Moves: ' + game.score.moveCount + '</p>' + 
+                '         </div>' + 
+                '      </div>' + 
+                '   </a>' + 
+                '</div>');
+              });
 
-            if(curGame.gameId == 0) {
-              selectGame(gamesList[0].gameId, gamesList[0].url);
+              if(curGame.gameId == 0) {
+                selectGame(gamesList[0].gameId, gamesList[0].url);
+              }
+            } else {
+              curGame = {gameId:0};
+              gamesList = new Array();
+              $('#maze_container').html('<h5>Please select a game from the list below to get started.</h5>');
+              $('#games').html('<h6 style="text-indent:20px;">There are no games running at the moment, why not start one?</h6>');
             }
+        }, error: function() {
+          $('#games').html('<h6 style="text-indent:20px;color:red">Unable to load the list of games - you might need to ask for help!</h6>');
         }});
       });
     }
@@ -157,12 +179,14 @@ html(lang='en')
         // make the ajax call
         $.ajax({url: gameUrl, success: function(result) {
             curGame = result;
+            lastPlayerLoc = '#' + curGame.player.location.row + 'x' + curGame.player.location.row;
+            playerLoc = '#' + curGame.player.location.row + 'x' + curGame.player.location.col;
             renderGame();
+            setPlayerLoc();
         }});
+
       }
     }
-
-
 
     function renderGame() {
       // TODO:
@@ -172,7 +196,6 @@ html(lang='en')
       let cells = curGame.maze.cells;
       let maze_width = cells[0].length * 50 //
       let parent_width = parseInt($('#main').css('width'));
-
 
       let cTxt ='';
 
@@ -201,10 +224,10 @@ html(lang='en')
 
           let cDiv = $('#' + row + 'x' + col);
 
-          if (!(cell.exits & 1)) cDiv.css('border-top', '1px solid black ');
-          if (!(cell.exits & 2)) cDiv.css('border-bottom', '1px solid black ');
-          if (!(cell.exits & 4)) cDiv.css('border-right', '1px solid black ');
-          if (!(cell.exits & 8)) cDiv.css('border-left', '1px solid black ');
+          if (!(cell.exits & 1)) cDiv.css('border-top', '2px solid black ');
+          if (!(cell.exits & 2)) cDiv.css('border-bottom', '2px solid black ');
+          if (!(cell.exits & 4)) cDiv.css('border-right', '2px solid black ');
+          if (!(cell.exits & 8)) cDiv.css('border-left', '2px solid black ');
 
           if (!!(cell.tags & 1)) cDiv.addClass('start');
           if (!!(cell.tags & 2)) cDiv.addClass('finish');
@@ -220,8 +243,8 @@ html(lang='en')
         else {
           zoom_value = "100%";
         }        
+        
         resizeContainer(document.getElementById('maze_container'), zoom_value);
-
     }
 
     // need to populate the list
@@ -234,8 +257,8 @@ html(lang='en')
     
     // change the rate at which the games list is refresshing
     function changeGamesListRefreshRate(newInterval) {
-      if (newInterval < 1000){
-        console.log('Too fast! Try 1000 or more.  Current rate: %dms', gamesListRefreshRate);
+      if (newInterval < 500){
+        console.log('Too fast! Try 500 or more.  Current rate: %dms', gamesListRefreshRate);
         return;
       }
       clearInterval(gamesListTimer);
@@ -246,7 +269,6 @@ html(lang='en')
 
 
     function resizeContainer(container, zoom_value = 0) {
-
       container.style.zoom = zoom_value;
     }; 
     

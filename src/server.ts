@@ -40,14 +40,14 @@ function startServer() {
     log.info(__filename, 'startServer()', 'Starting Game Monitor v' + consts.APP_VERSION);
 
     // start the http server
-    httpServer = app.listen(consts.GAME_MON_PORT, function () {
+    httpServer = app.listen(consts.GAME_MON_PORT, function() {
         log.info(__filename, 'startServer()', format('Game Monitor is listening on port %d', consts.GAME_MON_PORT));
 
         // enable express http compression
         app.use(compression());
 
         // This runs for ALL incoming requests
-        app.use(function (req, res, next) {
+        app.use(function(req, res, next) {
             log.trace(__filename, 'app.listen()', format('Incoming Request: %s', req.url));
 
             // add the CORS headers to all responses
@@ -58,22 +58,23 @@ function startServer() {
         });
 
         // live / readiness probes hit this
-        app.get('/live', function (req, res) {
+        app.get('/live', function(req, res) {
             log.debug(__filename, req.url, 'Liveness probe.');
             res.status(200).send();
         });
 
         // handle index page request
-        app.get(['/', '/index'], function (req, res) {
+        app.get(['/', '/index'], function(req, res) {
             res.render('index', {
                 host: req.headers.host,
                 gamesUrl: consts.GAME_SVC_URL_EXT + '/games',
-                gamesListRefreshRate: consts.GAME_LIST_REFRESH_RATE
+                gamesListRefreshRate: consts.GAME_LIST_REFRESH_RATE,
+                baseActionUrl: consts.GAME_SVC_URL_EXT + '/game/action/'
             });
         });
 
         // handle images, css, and js file requests
-        app.get(['/favicon.ico', '/views/images/:file', '/views/css/:file', '/views/js/:file'], function (req, res) {
+        app.get(['/favicon.ico', '/views/images/:file', '/views/css/:file', '/views/js/:file'], function(req, res) {
             // make sure file exits before sending
             if (fs.existsSync(path.resolve('.' + req.path).toString())) {
                 res.sendFile(path.resolve('.' + req.path));
@@ -83,7 +84,7 @@ function startServer() {
         });
 
         // Catch all - return 404/
-        app.get('/*', function (req, res) {
+        app.get('/*', function(req, res) {
             log.trace(__filename, req.url, 'Route not found, returning 404.');
             res.status(404).render('404', {
                 host: req.headers.host,
@@ -91,35 +92,6 @@ function startServer() {
                 title: 'Page Not Found'
             });
         });
-    });
-}
-
-/**
- * dead code.. left as sample for now
- * TODO: CLEAN UP!
- */
-// doRequest(url, timeout, callback)
-function refreshGameStubsCache() {
-    ReqMaker.doRequest(consts.GAME_SVC_URL + '/games', consts.GAME_LIST_REFRESH_RATE / 2, function cb_refreshGameStubsCache(res: any, body: any, err?: any) {
-        // check for Response Code 204 (No Content)
-        if (res.statusCode == 204) {
-            //gameStubs = new Array<IGameStub>();
-            log.debug(__filename, 'cb_refreshGameStubsCache()', format('No active games were found.'));
-        }
-
-        //log.debug(__filename, 'cb_refreshGameStubsCache()', format('gameStubs Cache Updated: %s game stubs loaded.', gameStubs.length));
-    });
-}
-
-/**
- * Useful debug tool - dumps key/val array to debug/trace logs
- *
- * @param list
- * @param key
- */
-function dumpArray(list: Array<any>, key: string) {
-    list.forEach(item => {
-        log.trace(__filename, 'dumpArray()', JSON.stringify(item));
     });
 }
 
