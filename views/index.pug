@@ -3,7 +3,7 @@ html(lang='en')
   head
     include head.pug
   // Page Content
-  .container
+  .container-fluid
     // Portfolio Item Heading
     h1.my-4(id='viewTitle') Game Monitor
     // Portfolio Item Row
@@ -268,7 +268,7 @@ html(lang='en')
     }
 
 
-    function resizeContainer(container, zoom_value = 0) {
-      container.style.zoom = zoom_value;
+    function resizeContainer(el_container, zoom_value = 0) {
+      el_container.style.zoom = zoom_value;
     }; 
     
