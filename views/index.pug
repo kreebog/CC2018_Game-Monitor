@@ -2,17 +2,28 @@ doctype html
 html(lang='en')
   head
     include head.pug
+  div(class="overlay")
   // Page Content
-  .container-fluid
-    // Portfolio Item Heading
-    h1.my-4(id='viewTitle') Game Monitor
-    // Portfolio Item Row
+  .container-fluid.text-light
+    
+    // Row to organize columns in Bootstrap...
     .row
-      div.col-md-8(id='main')
-        h5 Please select a game from the list below to get started.
-      .col-md-4(id='game_action')
+      .col-12
+        // Game Heading
+        h1.ml-3.mt-4.text-monospace(id='viewTitle' style='color: white;') Game Monitor
+    .row
+      
+      .card.col-md-7.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id="#" style='background-color: rgba(0, 0, 0, .3 ) !important;')
         
-        table.table.table-sm.table-dark.small.text-center(id='curMovement')
+        
+        div(id='main')
+          h5 Please select a game from the list below to get started.
+          
+      
+      
+      .card.col-md-3.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game_action' style='background-color: rgba(0, 0, 0, 0.3) !important;')
+        
+        table.table.table-sm.bg_transparent.small.text-center(id='curMovement')
           th(scope='col') Movement Actions
           tr
             td
@@ -40,7 +51,7 @@ html(lang='en')
                 button(class='bg-primary' id='btn_stand') Stand
                 button(class='bg-primary' id='btn_write') Write
         h3.my-3 Activity
-        table.table.table-sm.table-dark.small.text-center(id='curGameActivity')
+        table.table.table-sm.bg_transparent.small.text-center(id='curGameActivity')
           th(scope='col') Move
           th(scope='col') Action
           th(scope='col') Cohesion
@@ -58,7 +69,7 @@ html(lang='en')
             td 
               h1.badge.badge-success OK
         h3.my-3 Current Score
-        table.table.table-dark.text-center.font-weight-bold(id='curGameScore')
+        table.table.bg_transparent.text-center.font-weight-bold(id='curGameScore')
             th(scope='col') Round
             th(scope='col') Moves
             th(scope='col') Backtracks
@@ -71,12 +82,18 @@ html(lang='en')
         h3.my-3 Move Result
         p(id='curGame_outcomes') Nothing to see here...
     // /.row
+
+
+
+
     // Related Projects Row
     h3.my-4(id='games_header') Current Games
     .row(id='games')
-      h6(style="text-indent:20px;") There are no games running at the moment, why not start one?
-  // Footer
-  include foot.pug
+      // not rendering correctly:
+      .card.col-md-12.mx-4.my-4.pb-4.pt-3.px-4.border-0(style='background-color: rgba(0, 0, 0, .3 ) !important;')
+        h6(style="text-indent:20px;") There are no games running at the moment, why not start one?
+      // Footer
+      include foot.pug
   
   // AJAX functions go here...
   script(src='/views/js/resize.js')
@@ -238,10 +255,10 @@ html(lang='en')
 
           let cDiv = $('#' + row + 'x' + col);
 
-          if (!(cell.exits & 1)) cDiv.css('border-top', '2px solid black ');
-          if (!(cell.exits & 2)) cDiv.css('border-bottom', '2px solid black ');
-          if (!(cell.exits & 4)) cDiv.css('border-right', '2px solid black ');
-          if (!(cell.exits & 8)) cDiv.css('border-left', '2px solid black ');
+          if (!(cell.exits & 1)) cDiv.css('border-top', '2px solid #015FC0 ');
+          if (!(cell.exits & 2)) cDiv.css('border-bottom', '2px solid #015FC0 ');
+          if (!(cell.exits & 4)) cDiv.css('border-right', '2px solid #015FC0 ');
+          if (!(cell.exits & 8)) cDiv.css('border-left', '2px solid #015FC0 ');
 
           if (!!(cell.tags & 1)) cDiv.addClass('start');
           if (!!(cell.tags & 2)) cDiv.addClass('finish');
