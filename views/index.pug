@@ -89,6 +89,13 @@ html(lang='en')
     let lastPlayerLoc = '#0x0';
     
 
+    // Popovers must be initialized with jQuery.
+    // Enable all popovers in the document:
+    $(document).ready(function(){
+      $('[data-toggle="popover"]').popover(); 
+    });
+
+
     function getActionUrl(buttonId) {
       let ret = '!{baseActionUrl}' + curGame.id + '?act=' + buttonId.split('_')[1] + '&dir=';
       let dir = buttonId.substring(buttonId.length - 1);
@@ -251,7 +258,7 @@ html(lang='en')
           zoom_value = "100%";
         }        
         
-        resizeContainer(document.getElementById('maze_container'), zoom_value);
+        resizeContainer('maze_container', zoom_value);
     }
 
     // need to populate the list
@@ -274,8 +281,7 @@ html(lang='en')
       gamesListRefreshRate = newInterval;
     }
 
+ 
 
-    function resizeContainer(el_container, zoom_value = 0) {
-      el_container.style.zoom = zoom_value;
-    }; 
+ 
     

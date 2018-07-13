@@ -1,3 +1,10 @@
+// resize any container
+function resizeContainer(el_container, zoom_value = 0) {
+    document.getElementById(el_container).style.zoom = zoom_value;
+};
+
+
+// resize maze in response to changes in window size
 window.onload = function() {
     window.addEventListener('resize', () => {
         try {
@@ -27,5 +34,7 @@ window.onload = function() {
         }
         document.getElementById('maze_container').style.zoom = zoom_value;
     } // end resizeContainer
+
+
 };
 //# sourceMappingURL=resize.js.map
