@@ -36,6 +36,9 @@ html(lang='en')
                 button(class='movement_btns' id='btn_Jump_S') J
                 button(class='movement_btns' id='btn_move_S') M
                 button(class='movement_btns' id='btn_look_S') L
+              div(id="movementBtnGroupStandWrite")
+                button(class='bg-primary' id='btn_stand') Stand
+                button(class='bg-primary' id='btn_write') Write
         h3.my-3 Activity
         table.table.table-sm.table-dark.small.text-center(id='curGameActivity')
           th(scope='col') Move
@@ -90,11 +93,15 @@ html(lang='en')
       let ret = '!{baseActionUrl}' + curGame.id + '?act=' + buttonId.split('_')[1] + '&dir=';
       let dir = buttonId.substring(buttonId.length - 1);
 
-      if (dir == 'N') ret += 'north';
-      if (dir == 'S') ret += 'south';
-      if (dir == 'E') ret += 'east';
-      if (dir == 'W') ret += 'west';
-    
+      let t = 'none'
+      switch (dir) {
+        case 'N': t = 'north'; break;
+        case 'S': t = 'south'; break;
+        case 'E': t = 'east'; break;
+        case 'W': t = 'west'; break;
+      }
+      ret += t;
+
     console.log(ret);
       return ret;
     }

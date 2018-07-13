@@ -101,3 +101,25 @@ body {
     padding-left: 2em;
     margin: 0;
 }
+/* 
+#movementBtnGroupStandWrite {
+    border: 1px solid #ffc107;
+} */
+
+#btn_stand, #btn_write {
+    border-radius: 2px;
+    border-radius: 0.25rem;
+    background-color: #ffc107;
+    color: white;
+    border: 0;
+    padding: 0.25em 0.4em;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0.25em;
+    cursor: pointer;
+}
+
