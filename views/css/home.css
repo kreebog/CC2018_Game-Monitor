@@ -1,22 +1,22 @@
 body {
     padding-top: 54px;
-    background:url(../images/digital.jpg);
+    background: url(../images/digital.jpg);
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
-        /* background-position: fi */
+    /* background-position: fi */
 }
 .overlay {
-    background-color:rgba(0,0,0, 0.2);
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     height: 100%;
     width: 100%;
+    z-index: -99;
 }
-
 
 @media (min-width: 992px) {
     body {
@@ -24,7 +24,18 @@ body {
     }
 }
 
+.outcomes-container {
+    min-height: 250px;
+    max-height: 250px;
+    background-color: black;
+    border: solid 1px white;
+    overflow: hidden;
+    font-family: consolas, monospace, serif;
+    color: #00ff00;
+}
+
 #maze_container {
+    color: black;
     position: relative;
     padding: 0;
     margin: 0;
@@ -45,9 +56,9 @@ body {
     font-size: 2rem;
     font-weight: bold;
     text-align: center;
-    border: solid 1px #E2E2E2;
+    border: solid 1px #e2e2e2;
     border-style: dashed;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     height: 50px;
     width: 50px;
     margin: 0;
@@ -67,43 +78,28 @@ body {
     background-color: lightcoral;
 }
 
-
-
-
-
-
-
-
-
-
-.menuButton{
-    padding:.25rem .75rem;
-    font-size:1.25rem;
-    line-height:1;
-    background-color:transparent;
-    border:1px solid transparent;
-    border-radius:.25rem;
+.bot-badge {
+    margin-left: 2px;
+    margin-right: 2px;
+}
+.menuButton {
+    padding: 0.25rem 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
     margin-top: 5px;
 }
 
-
 trans-4 {
-
     background-color: rgba(0, 0, 0, 0.4) !important;
-
 }
-
-
-
-
-
 
 .navbar-toggler:hover {
     color: white;
     border-color: white;
 }
-
-
 
 /********************* MOVEMENT BUTTONS - REMOVE BEFORE PROD *********************/
 
@@ -158,8 +154,8 @@ trans-4 {
     margin: 0;
 }
 
-
-#btn_stand, #btn_write {
+#btn_stand,
+#btn_write {
     border-radius: 2px;
     border-radius: 0.25rem;
     color: white;

@@ -2,27 +2,19 @@ doctype html
 html(lang='en')
   head
     include head.pug
-  div(class="overlay")
+  .overlay
   // Page Content
   .container-fluid.text-light
-    
     // Row to organize columns in Bootstrap...
     .row
       .col-12
         // Game Heading
         h1.ml-3.mt-4.text-monospace(id='viewTitle' style='color: white;') Game Monitor
     .row
-      
       .card.col-md-7.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id="#" style='background-color: rgba(0, 0, 0, .3 ) !important;')
-        
-        
         div(id='main')
           h5 Please select a game from the list below to get started.
-          
-      
-      
       .card.col-md-3.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game_action' style='background-color: rgba(0, 0, 0, 0.3) !important;')
-        
         table.table.table-sm.bg_transparent.small.text-center(id='curMovement')
           th(scope='col') Movement Actions
           tr
@@ -50,50 +42,52 @@ html(lang='en')
               div(id="movementBtnGroupStandWrite")
                 button(class='bg-primary' id='btn_stand') Stand
                 button(class='bg-primary' id='btn_write') Write
-        h3.my-3 Activity
-        table.table.table-sm.bg_transparent.small.text-center(id='curGameActivity')
-          th(scope='col') Move
-          th(scope='col') Action
-          th(scope='col') Cohesion
-          th(scope='col') Result
-          tr
-            td 1
-            td
-              h1.badge.badge-primary.badge-warning South
-            td
-              h1.badge.badge-success B1
-              h1.badge.badge-danger B2
-              h1.badge.badge-success B3
-              h1.badge.badge-danger B4
-              h1.badge.badge-success B5
-            td 
-              h1.badge.badge-success OK
-        h3.my-3 Current Score
-        table.table.bg_transparent.text-center.font-weight-bold(id='curGameScore')
-            th(scope='col') Round
-            th(scope='col') Moves
-            th(scope='col') Backtracks
-            th(scope='col') Bonus
+        .container(id='gameActivity')
+          h3.my-3 Activity
+          table.table.table-sm.bg_transparent.text-center.small
+            th(scope='col') Move
+            th(scope='col') Action
+            th(scope='col') Cohesion
+            th(scope='col') Result
             tr
-              td(id='curGame_round') 0
-              td(id='curGame_moves') 0
-              td(id='curGame_backtracks') 0
-              td(id='curGame_bonus') 0
-        h3.my-3 Move Result
-        p(id='curGame_outcomes') Nothing to see here...
-    // /.row
-
-
-
-
-    // Related Projects Row
-    h3.my-4(id='games_header') Current Games
-    .row(id='games')
-      // not rendering correctly:
-      .card.col-md-12.mx-4.my-4.pb-4.pt-3.px-4.border-0(style='background-color: rgba(0, 0, 0, .3 ) !important;')
+              td 
+                span(id='actMoveNum') 1
+              td(id='curGameActions')
+                span(id='actAction') 
+                  h1.badge.badge-primary.badge-warning South
+              td
+                span(id='actB1')
+                  h1.badge.badge-success.bot-badge B1
+                span(id='actB1')
+                  h1.badge.badge-danger.bot-badge B2
+                span(id='actB1')
+                  h1.badge.badge-success.bot-badge B3
+                span(id='actB1')
+                  h1.badge.badge-danger.bot-badge B4
+                span(id='actB1')
+                  h1.badge.badge-success.bot-badge B5
+              td 
+                span(id='actResult') 
+                  h1.badge.badge-success OK
+          h3.my-3 Current Score
+          table.table.table-sm.bg_transparent.text-center.small
+              th(scope='col') Round
+              th(scope='col') Moves
+              th(scope='col') Backtracks
+              th(scope='col') Bonus
+              tr
+                td(id='curGame_round') 0
+                td(id='curGame_moves') 0
+                td(id='curGame_backtracks') 0
+                td(id='curGame_bonus') 0
+          h3.my-3 Move Result
+          .container.small.outcomes-container(id='curGame_outcomes') No activity reported...
+    .row
+      .col-12(id='games')
+        h3 Current Games
         h6(style="text-indent:20px;") There are no games running at the moment, why not start one?
-      // Footer
-      include foot.pug
+  // Footer
+  include foot.pug
   
   // AJAX functions go here...
   script(src='/views/js/resize.js')
@@ -104,13 +98,28 @@ html(lang='en')
     let curGame = {gameId:0};
     let playerLoc = '#0x0';
     let lastPlayerLoc = '#0x0';
-    
 
     // Popovers must be initialized with jQuery.
     // Enable all popovers in the document:
     $(document).ready(function(){
       $('[data-toggle="popover"]').popover(); 
     });
+
+    function resetGamesView(showNoGames, showError) {
+      let noGames = '<h3>Current Games</h3>';
+      if (showError) {
+        noGames += '  <h6 style="text-indent:20px;color:red">Unable to load the list of games - you might need to ask for help!</h6>';
+      } else if (showNoGames) {
+        noGames += '  <h6 style="text-indent:20px;">There are no games running at the moment, why not start one?</h6>';
+      }
+
+      $('#games').html(noGames);
+    }
+
+    function resetMazeView() {
+      $('#viewTitle').html('Game Monitor');
+      $('#main').html('<h5>Please select a game from the list below to get started.</h5>');
+    }
 
 
     function getActionUrl(buttonId) {
@@ -167,7 +176,7 @@ html(lang='en')
         $.ajax({url: '!{gamesUrl}', success: function(result) {
             if (result.status === undefined && result.length > 0) {
               gamesList = result;
-              $('#games').html('');
+              resetGamesView(false, false);
               gamesList.forEach( function(game, index) { 
                 $('#games').append('<div class="col-md-3 col-sm-6 mb-4">' +
                 '   <a class="btn" onclick="selectGame(&quot;' + game.gameId + '&quot, &quot;' + game.url + '&quot;)">' + 
@@ -190,11 +199,11 @@ html(lang='en')
             } else {
               curGame = {gameId:0};
               gamesList = new Array();
-              $('#maze_container').html('<h5>Please select a game from the list below to get started.</h5>');
-              $('#games').html('<h6 style="text-indent:20px;">There are no games running at the moment, why not start one?</h6>');
+              resetGamesView(true, false);
+              resetMazeView();
             }
         }, error: function() {
-          $('#games').html('<h6 style="text-indent:20px;color:red">Unable to load the list of games - you might need to ask for help!</h6>');
+          resetGamesView(false, true);
         }});
       });
     }
@@ -233,7 +242,7 @@ html(lang='en')
       $('#viewTitle').html(curGame.team.name + ' in ' + curGame.maze.seed);
 
       // Create new maze container and insert into vpGame 
-      $('#main').html("");
+      $('#main').html('');
       $('#main').append('<div id="maze_container"> </div>');
       $('#maze_container').css('width', '500px');
       
