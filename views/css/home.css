@@ -7,7 +7,7 @@ body {
         /* background-position: fi */
 }
 .overlay {
-    background-color:rgba(0,0,0, 0.2);
+    background-color:rgba(0,0,0, 0.6);
     position:fixed;
     top:0;
     left:0;
@@ -42,6 +42,7 @@ body {
 }
 
 .maze_cell {
+    color: black;
     font-size: 2rem;
     font-weight: bold;
     text-align: center;
