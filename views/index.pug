@@ -15,6 +15,19 @@ html(lang='en')
       .card.col-md-7.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game')
         div(id='main')
           h5 Please select a game from the list below to get started.
+        .d-flex.justify-content-between.border.px-4.my-4(id="media_controls")
+          button(id='media_controls_rew')
+            span(class="fa fa-fast-backward" style='font-size:26px;')
+          button(id='media_controls_back')
+            span(class="fa fa-backward" style='font-size:26px;')
+          button(id='media_controls_play')
+            span(class="fa fa-play" style='font-size:26px')
+          button(id='media_controls_pause')
+            span(class="fa fa-pause" style='font-size:26px')
+          button(id='media_controls_forward')
+            span(class="fa fa-forward" style='font-size:26px')
+          button(id='media_controls_ffw')
+            span(class="fa fa-fast-forward" style='font-size:26px')
       .card.col-md-3.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game_action')
         table.table.table-sm.bg_transparent.small.text-center(id='curMovement')
           th(scope='col') Movement Actions
@@ -89,6 +102,9 @@ html(lang='en')
         h6(style="text-indent:20px;") There are no games running at the moment, why not start one?
   // Footer
   include foot.pug
+
+  // Menu
+  // include menu.pug
   
   // AJAX functions go here...
   script(src='/views/js/resize.js')
@@ -99,12 +115,21 @@ html(lang='en')
     let curGame = {gameId:0};
     let playerLoc = '#0x0';
     let lastPlayerLoc = '#0x0';
+    let movesList = new Array();
 
     // Popovers must be initialized with jQuery.
-    // Enable all popovers in the document:
-    $(document).ready(function(){
-      $('[data-toggle="popover"]').popover(); 
+    // Calling twice will disable all popovers in the document:
+    $(function () {
+      $('#btn_gameplay_results').popover({
+        template: '<div id="menu_popover" class="popover" role="tooltip"><h3 class="popover-header"></h3><div class="popover-body"></div></div>',
+        html: true, 
+        placement: 'bottom',
+        content: 'some different stuff here and herlansfdalkhsbfkhabgkhba;fjnbakjfsn;kjsafd;kjsa;kjd'
+      })
     });
+
+
+
 
     function resetGamesView(showNoGames, showError) {
       let noGames = '<h3>Current Games</h3>';
@@ -121,7 +146,6 @@ html(lang='en')
       $('#viewTitle').html('Game Monitor');
       $('#main').html('<h5>Please select a game from the list below to get started.</h5>');
     }
-
 
     function getActionUrl(buttonId) {
       let ret = '!{baseActionUrl}' + curGame.id + '?act=' + buttonId.split('_')[1] + '&dir=';
@@ -162,6 +186,19 @@ html(lang='en')
       });
     }
 
+    var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
+    for(var i = 0 ; i < media_buttons.length ; i++) {
+      media_buttons[i].addEventListener('click', function() {
+        alert('You click ' + this.textContent + ", id=" + this.id);
+      })
+    }
+    
+    
+    
+      
+
+
+    // Player Location
     function setPlayerLoc() {
       $(lastPlayerLoc).html('');
       $(playerLoc).html('@');
@@ -169,6 +206,12 @@ html(lang='en')
       console.log('moving from %s to %s', lastPlayerLoc, playerLoc);
       lastPlayerLoc = playerLoc.toString();
     }
+
+
+
+
+
+
 
     // refreshes the current games list
     function refreshGames() {
@@ -206,6 +249,9 @@ html(lang='en')
         }, error: function() {
           resetGamesView(false, true);
         }});
+
+
+        // 
       });
     }
 
@@ -284,8 +330,10 @@ html(lang='en')
         else {
           zoom_value = "100%";
         }        
-        
+        $('#maze_container').append($('#media_controls'));
+        $('#media_controls').css('color', 'white')
         resizeContainer('maze_container', zoom_value);
+
     }
 
     // need to populate the list

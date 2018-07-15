@@ -7,6 +7,7 @@ link(rel='stylesheet' href='/views/css/bootstrap.min.css')
 link(rel='stylesheet' href='/views/css/home.css')
 // Menu icon from Font Awesome
 link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
+script(src='/views/js/menu2.js')
 body
   // Navigation
   nav.navbar.navbar-dark.fixed-top(style='background-color: rgba(0, 123, 255, 0.9) !important;')
@@ -15,7 +16,7 @@ body
       div(style='margin:0;padding:0;border:0;')
         button.navbar-toggler.ml-auto.mr-2(type='button' data-toggle='collapse' data-target='#navbarResponsive' aria-controls='navbarResponsive' aria-expanded='false' aria-label='Toggle navigation')
           span(class='fa fa-bars' style='font-size:30px')
-        button.navbar-toggler(data-toggle="popover" data-placement="bottom" title="Popover Header" data-content="Some content inside the popover")
+        button.navbar-toggler(id='btn_gameplay_results' data-toggle='popover')
           span(class='fa fa-chevron-down' style='font-size:30px')
       
       #navbarResponsive.collapse.navbar-collapse

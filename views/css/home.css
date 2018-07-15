@@ -83,14 +83,16 @@ body {
     margin-left: 2px;
     margin-right: 2px;
 }
-.menuButton {
-    padding: 0.25rem 0.75rem;
-    font-size: 1.25rem;
-    line-height: 1;
+
+
+#media_controls_rew, #media_controls_back, #media_controls_play, #media_controls_pause, #media_controls_forward, #media_controls_ffw  {
+    color: white;
+    font-size: 26px;
     background-color: transparent;
     border: 1px solid transparent;
-    border-radius: 0.25rem;
     margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
 }
 
 #game_action, #game {
@@ -102,7 +104,16 @@ body {
     border-color: white;
 }
 
-/********************* MOVEMENT BUTTONS - REMOVE BEFORE PROD *********************/
+.popover {
+
+
+    background-color:rgba(0, 0, 0, .2) !important;
+} 
+
+
+
+
+/********************* MOVEMENT BUTTONS - REMOVE BEFORE PROD ********************/
 
 .movement_btns {
     border-radius: 2px;
@@ -118,8 +129,6 @@ body {
     font-weight: 700;
     line-height: 1;
     margin: 0.25em;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
     cursor: pointer;
 }
 
