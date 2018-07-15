@@ -191,12 +191,7 @@ html(lang='en')
       });
     }
 
-    var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
-    for(var i = 0 ; i < media_buttons.length ; i++) {
-      media_buttons[i].addEventListener('click', function() {
-        console.log('You click ' + this.textContent + ", id=" + this.id);
-      })
-    }
+
     
     
     
@@ -309,9 +304,8 @@ html(lang='en')
               }
               else break;
               
-              (async function intermittent() {
-                await sleep(500);
-              })();
+              intermittent();
+
             }
             break;
           }
@@ -343,6 +337,7 @@ html(lang='en')
                 setPlayerLoc();
               }
               else break;
+
               (async function intermittent() {
                 await sleep(500);
               })();
@@ -411,6 +406,10 @@ html(lang='en')
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
+
+    async function intermittent() {
+      await sleep(2000);
+    };
 
     // Get moves stack for current game
     function getGameData() {
@@ -512,7 +511,7 @@ html(lang='en')
       else {
         zoom_value = "100%";
       }        
-      $('#maze_container').append($('#media_controls'));
+      
       $('#media_controls').css('color', 'white')
       resizeContainer('maze_container', zoom_value);
 
