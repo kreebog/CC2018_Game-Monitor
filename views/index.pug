@@ -288,11 +288,14 @@ html(lang='en')
         switch (this.id) {
           case 'media_controls_rew' : {
             while (mediaControls.rew == true) {
-              let tmp = JSON.stringify(getMovePlayback('prev'));
-              playerLoc = tmp.row + "x" + tmp.col;
-              setPlayerLoc();
+              let tmp = getMovePlayback('prev');
+              if (tmp !== undefined) {
+                playerLoc = tmp.row + "x" + tmp.col;
+                setPlayerLoc();
+              }
+              
               (async function intermittent() {
-                await sleep(2000);
+                await sleep(500);
               })();
 
             }
