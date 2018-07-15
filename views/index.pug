@@ -119,6 +119,7 @@ html(lang='en')
     let stopGettingGameData = false;
     let movesList = new Array();
     let currentMove = 0;
+    let mediaControls = {rew: false, back: false, play: false, pause: false, forward: false, ffw: false};
 
     // Popovers must be initialized with jQuery.
     // Calling twice will disable all popovers in the document:
@@ -190,38 +191,7 @@ html(lang='en')
       });
     }
 
-    var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
-    for(var i = 0 ; i < media_buttons.length ; i++) {
-      media_buttons[i].addEventListener('click', function() {
-        switch (this.id) {
-          case 'media_controls_rew' : {
-
-            break;
-          }
-          case 'media_controls_back' : {
-
-            break;
-          }
-          case 'media_controls_play' : {
-
-            break;
-          }
-          case 'media_controls_pause' : {
-
-            break;
-          }
-          case 'media_controls_forward' : {
-            
-            break;
-          }
-          case 'media_controls_ffw' : {
-
-            break;
-          }
-        }
-      })
-    }
-    
+   
       
 
 
@@ -232,6 +202,7 @@ html(lang='en')
 
       console.log('moving from %s to %s', lastPlayerLoc, playerLoc);
       lastPlayerLoc = playerLoc.toString();
+
     }
 
     // refreshes the current games list
@@ -307,13 +278,86 @@ html(lang='en')
 
 
 
+    var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
+    for(var i = 0 ; i < media_buttons.length ; i++) {
+      media_buttons[i].addEventListener('click', function() {
+        for (control in mediaControls) {
+          mediaControls.control = false;
+        }
+        mediaControls.rew = true;
+        switch (this.id) {
+          case 'media_controls_rew' : {
+            while (mediaControls.rew == true) {
+              let tmp = JSON.stringify(getMovePlayback('prev'));
+              playerLoc = tmp.row + "x" + tmp.col;
+              setPlayerLoc();
+              (async function intermittent() {
+                await sleep(2000);
+              })();
+
+            }
+            
+            break;
+          }
+          case 'media_controls_back' : {
+            for (control in mediaControls) {
+              mediaControls.control = false;
+            }
 
 
-    // getMovePlayback(prev | next)
+
+            break;
+          }
+          case 'media_controls_play' : {
+            for (control in mediaControls) {
+              mediaControls.control = false;
+            }
+
+
+
+            break;
+          }
+          case 'media_controls_pause' : {
+            for (control in mediaControls) {
+              mediaControls.control = false;
+            }
+
+
+
+            break;
+          }
+          case 'media_controls_forward' : {
+            for (control in mediaControls) {
+              mediaControls.control = false;
+            }
+
+
+
+            break;
+          }
+          case 'media_controls_ffw' : {
+            for (control in mediaControls) {
+              mediaControls.control = false;
+            }
+
+
+
+            break;
+          }
+        }
+      })
+    }
+
+
+
+
+    /* Function getMovePlayback(prev | next)
+     * @return object of type {row: y, col: x}
+     */
     function getMovePlayback(iteration) {
       switch (iteration) {
-        case 'prev' : return (((currentMove-1) in movesList) ? movesList[--currentMove] : undefined);
-        case 'next' : return (((currentMove) in movesList) ? movesList[currentMove++] : undefined);
+        case 'prev' : return (((currentMove-1) in movesList) ? movesList[--currentMove].location : undefined);
+        case 'next' : return (((currentMove) in movesList) ? movesList[currentMove++].location : undefined);
       }
     }
 
