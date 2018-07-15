@@ -9,13 +9,13 @@ html(lang='en')
     .row
       .col-md-6.mt-5.px-5
         // Game Heading
-        div.text-monospace.border-left-0.border-right-0(style='border: 1px solid white;')
+        div.text-monospace.border-left-0.border-right-0.pt-2(id='game_header' style='border: 1px solid white;')
           h2.ml-3(id='viewTitle' style='color: white;') Game Monitor
     .row
       .card.col-md-7.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game')
         div(id='main')
           h5 Please select a game from the list below to get started.
-        .d-flex.justify-content-between.border.px-4.my-4(id="media_controls")
+        .d-flex.justify-content-between.border.px-4.my-4.d-none(id="media_controls")
           button(id='media_controls_rew')
             span(class="fa fa-fast-backward" style='font-size:26px;')
           button(id='media_controls_back')
@@ -115,7 +115,10 @@ html(lang='en')
     let curGame = {gameId:0};
     let playerLoc = '#0x0';
     let lastPlayerLoc = '#0x0';
+    let lastMoveFetched = 0;
+    let stopGettingGameData = false;
     let movesList = new Array();
+    let currentMove = 0;
 
     // Popovers must be initialized with jQuery.
     // Calling twice will disable all popovers in the document:
@@ -146,6 +149,7 @@ html(lang='en')
       $('#viewTitle').html('Game Monitor');
       $('#main').html('<h5>Please select a game from the list below to get started.</h5>');
     }
+
 
     function getActionUrl(buttonId) {
       let ret = '!{baseActionUrl}' + curGame.id + '?act=' + buttonId.split('_')[1] + '&dir=';
@@ -179,7 +183,7 @@ html(lang='en')
           
             playerLoc = '#' + result.location.row + 'x' + result.location.col;
             setPlayerLoc();
-          } 
+          }
         });
         
         console.log('You clicked ' + this.textContent + ", id=" + this.id);
@@ -189,11 +193,34 @@ html(lang='en')
     var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
     for(var i = 0 ; i < media_buttons.length ; i++) {
       media_buttons[i].addEventListener('click', function() {
-        alert('You click ' + this.textContent + ", id=" + this.id);
+        switch (this.id) {
+          case 'media_controls_rew' : {
+
+            break;
+          }
+          case 'media_controls_back' : {
+
+            break;
+          }
+          case 'media_controls_play' : {
+
+            break;
+          }
+          case 'media_controls_pause' : {
+
+            break;
+          }
+          case 'media_controls_forward' : {
+            
+            break;
+          }
+          case 'media_controls_ffw' : {
+
+            break;
+          }
+        }
       })
     }
-    
-    
     
       
 
@@ -206,12 +233,6 @@ html(lang='en')
       console.log('moving from %s to %s', lastPlayerLoc, playerLoc);
       lastPlayerLoc = playerLoc.toString();
     }
-
-
-
-
-
-
 
     // refreshes the current games list
     function refreshGames() {
@@ -239,19 +260,20 @@ html(lang='en')
 
               if(curGame.gameId == 0) {
                 selectGame(gamesList[0].gameId, gamesList[0].url);
+                
               }
+
             } else {
-              curGame = {gameId:0};
-              gamesList = new Array();
-              resetGamesView(true, false);
-              resetMazeView();
-            }
+                curGame = {gameId:0};
+                gamesList = new Array();
+                resetGamesView(true, false);
+                resetMazeView();
+                movesList = [];
+                currentMove = 0;
+              }
         }, error: function() {
           resetGamesView(false, true);
         }});
-
-
-        // 
       });
     }
 
@@ -266,14 +288,79 @@ html(lang='en')
         // make the ajax call
         $.ajax({url: gameUrl, success: function(result) {
             curGame = result;
-            lastPlayerLoc = '#' + curGame.player.location.row + 'x' + curGame.player.location.row;
+            lastPlayerLoc = '#' + curGame.player.location.row + 'x' + curGame.player.location.col;
             playerLoc = '#' + curGame.player.location.row + 'x' + curGame.player.location.col;
             renderGame();
             setPlayerLoc();
+            lastMoveFetched = 0;
+            movesList = [];
+            currentMove = 0;
+            getGameData();
         }});
 
       }
     }
+
+
+
+
+
+
+
+
+
+    // getMovePlayback(prev | next)
+    function getMovePlayback(iteration) {
+      switch (iteration) {
+        case 'prev' : return (((currentMove-1) in movesList) ? movesList[--currentMove] : undefined);
+        case 'next' : return (((currentMove) in movesList) ? movesList[currentMove++] : undefined);
+      }
+    }
+
+    // Simple sleep promises utilizing async/await
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Get moves stack for current game
+    function getGameData() {
+      let gameDataURL = 'http://game.code-camp-2018.com/actions/get/' + curGame.id + '?start=' + (lastMoveFetched+1).toString();
+      $.ajax({url: gameDataURL, success: function(result) {
+        if (result.status === undefined && result.length > 0) {
+          console.log("fetching data...");
+            
+            (async function intermittent() {
+              await sleep(2000);
+              for (action in result) {
+                movesList.push(result[action]);
+              }
+              lastMoveFetched = movesList.length;
+              console.log("Fetching " + lastMoveFetched + " moves...");
+              getGameData();
+            })();
+        }
+        else {
+          // no game data left to fetch...
+          // No moves detected since last request.
+          lastMoveFetched = 0;
+
+        }
+        
+      }, error: function() {
+        console.log("Something went wrong when attempting to fetch Game data. Better ask for help.");
+      }});
+    } // end 
+
+
+
+
+
+
+
+
+
+
+
 
     function renderGame() {
       // TODO:
@@ -330,15 +417,14 @@ html(lang='en')
         else {
           zoom_value = "100%";
         }        
-        $('#maze_container').append($('#media_controls'));
+        
         $('#media_controls').css('color', 'white')
         resizeContainer('maze_container', zoom_value);
-
     }
 
     // need to populate the list
     refreshGames();
-    
+
     // then start the refresh timer
     let gamesListRefreshRate = !{gamesListRefreshRate};
     let gamesListTimer = setInterval(refreshGames, gamesListRefreshRate);
