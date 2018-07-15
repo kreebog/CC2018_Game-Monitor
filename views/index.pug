@@ -207,6 +207,7 @@ html(lang='en')
     function setPlayerLoc() {
       $(lastPlayerLoc).html('');
       $(playerLoc).html('@');
+      console.log(playerLoc);
 
       console.log('moving from %s to %s', lastPlayerLoc, playerLoc);
       lastPlayerLoc = playerLoc.toString();
@@ -290,18 +291,23 @@ html(lang='en')
     for(var i = 0 ; i < media_buttons.length ; i++) {
       media_buttons[i].addEventListener('click', function() {
 
-        mediaControls.rew = true;
+       
         switch (this.id) {
           case 'media_controls_rew' : {
+            // reset all controls to false
             for (control in mediaControls) {
               mediaControls.control = false;
             }
+            // set rew to true
+            mediaControls.rew = true;
+            // while true, get prev, pause, repeat
             while (mediaControls.rew == true) {
               let tmp = getMovePlayback('prev');
               if (tmp !== undefined) {
-                playerLoc = tmp.row + "x" + tmp.col;
+                playerLoc = "#" + tmp.row + "x" + tmp.col;
                 setPlayerLoc();
               }
+              else break;
               
               (async function intermittent() {
                 await sleep(500);
@@ -314,19 +320,33 @@ html(lang='en')
             for (control in mediaControls) {
               mediaControls.control = false;
             }
-
-
-
+            let tmp = getMovePlayback('prev');
+            if (tmp !== undefined) {
+                playerLoc = "#" + tmp.row + "x" + tmp.col;
+                setPlayerLoc();
+              }
+              
             break;
           }
           
           case 'media_controls_play' : {
+            // reset all controls to false
             for (control in mediaControls) {
               mediaControls.control = false;
             }
-
-
-
+            mediaControls.play = true;
+            // while play is true, get next move, pause, repeat
+            while (mediaControls.play == true) {
+              let tmp = getMovePlayback('next');
+              if (tmp !== undefined) {
+                playerLoc = "#" + tmp.row + "x" + tmp.col;
+                setPlayerLoc();
+              }
+              else break;
+              (async function intermittent() {
+                await sleep(500);
+              })();
+            }
             break;
           }
           
@@ -334,9 +354,6 @@ html(lang='en')
             for (control in mediaControls) {
               mediaControls.control = false;
             }
-
-
-
             break;
           }
           
@@ -344,9 +361,11 @@ html(lang='en')
             for (control in mediaControls) {
               mediaControls.control = false;
             }
-
-
-
+              let tmp = getMovePlayback('next');
+              if (tmp !== undefined) {
+                playerLoc = "#" + tmp.row + "x" + tmp.col;
+                setPlayerLoc();
+              }
             break;
           }
           
@@ -354,7 +373,19 @@ html(lang='en')
             for (control in mediaControls) {
               mediaControls.control = false;
             }
-
+            mediaControls.ffw = true;
+            // while play is true, get next move, pause, repeat
+            while (mediaControls.ffw == true) {
+              let tmp = getMovePlayback('next');
+              if (tmp !== undefined) {
+                playerLoc = "#" + tmp.row + "x" + tmp.col;
+                setPlayerLoc();
+              }
+              else break;
+              (async function intermittent() {
+                await sleep(500);
+              })();
+            }
 
 
             break;
