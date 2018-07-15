@@ -191,7 +191,15 @@ html(lang='en')
       });
     }
 
-   
+    var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
+    for(var i = 0 ; i < media_buttons.length ; i++) {
+      media_buttons[i].addEventListener('click', function() {
+        console.log('You click ' + this.textContent + ", id=" + this.id);
+      })
+    }
+    
+    
+    
       
 
 
@@ -281,12 +289,13 @@ html(lang='en')
     var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
     for(var i = 0 ; i < media_buttons.length ; i++) {
       media_buttons[i].addEventListener('click', function() {
-        for (control in mediaControls) {
-          mediaControls.control = false;
-        }
+
         mediaControls.rew = true;
         switch (this.id) {
           case 'media_controls_rew' : {
+            for (control in mediaControls) {
+              mediaControls.control = false;
+            }
             while (mediaControls.rew == true) {
               let tmp = getMovePlayback('prev');
               if (tmp !== undefined) {
@@ -297,11 +306,10 @@ html(lang='en')
               (async function intermittent() {
                 await sleep(500);
               })();
-
             }
-            
             break;
           }
+          
           case 'media_controls_back' : {
             for (control in mediaControls) {
               mediaControls.control = false;
@@ -311,6 +319,7 @@ html(lang='en')
 
             break;
           }
+          
           case 'media_controls_play' : {
             for (control in mediaControls) {
               mediaControls.control = false;
@@ -320,6 +329,7 @@ html(lang='en')
 
             break;
           }
+          
           case 'media_controls_pause' : {
             for (control in mediaControls) {
               mediaControls.control = false;
@@ -329,6 +339,7 @@ html(lang='en')
 
             break;
           }
+          
           case 'media_controls_forward' : {
             for (control in mediaControls) {
               mediaControls.control = false;
@@ -338,6 +349,7 @@ html(lang='en')
 
             break;
           }
+          
           case 'media_controls_ffw' : {
             for (control in mediaControls) {
               mediaControls.control = false;
@@ -453,20 +465,26 @@ html(lang='en')
           if (!!(cell.tags & 1)) cDiv.addClass('start');
           if (!!(cell.tags & 2)) cDiv.addClass('finish');
           
-          if (!!(cell.tags & 4) && !(cell.tags & 1) && !(cell.tags & 2)) cDiv.addClass('path');
-
+          if (!!(cell.tags & 4)) cDiv.addClass('path');
+          if (!!(cell.tags & 16)) cDiv.addClass('lava');
+          if (!!(cell.tags & 32)) cDiv.addClass('trap-pit');
+          /* if (!!(cell.tags & 64)) cDiv.addClass('trap-bear'); not ready to add bear trap logic yet*/
+          if (!!(cell.tags & 256)) cDiv.addClass('trap-flame');
+          
         }
       }
-        let zoom_value;
-        if (maze_width > parent_width) {
-          zoom_value = ((parent_width / maze_width)*90).toFixed(6).toString() + "%";
-        }
-        else {
-          zoom_value = "100%";
-        }        
-        
-        $('#media_controls').css('color', 'white')
-        resizeContainer('maze_container', zoom_value);
+
+      let zoom_value;
+      if (maze_width > parent_width) {
+        zoom_value = ((parent_width / maze_width)*90).toFixed(6).toString() + "%";
+      }
+      else {
+        zoom_value = "100%";
+      }        
+      $('#maze_container').append($('#media_controls'));
+      $('#media_controls').css('color', 'white')
+      resizeContainer('maze_container', zoom_value);
+
     }
 
     // need to populate the list
