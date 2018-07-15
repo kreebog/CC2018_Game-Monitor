@@ -120,6 +120,7 @@ html(lang='en')
     let movesList = new Array();
     let currentMove = 0;
     let mediaControls = {rew: false, back: false, play: false, pause: false, forward: false, ffw: false};
+    let playbackTimer; // used to control auto playback interval timer 
 
     // Popovers must be initialized with jQuery.
     // Calling twice will disable all popovers in the document:
@@ -314,6 +315,7 @@ html(lang='en')
             for (control in mediaControls) {
               mediaControls.control = false;
             }
+
             let tmp = getMovePlayback('prev');
             if (tmp !== undefined) {
                 playerLoc = "#" + tmp.row + "x" + tmp.col;
@@ -328,26 +330,33 @@ html(lang='en')
             for (control in mediaControls) {
               mediaControls.control = false;
             }
+
             mediaControls.play = true;
-            // while play is true, get next move, pause, repeat
-            while (mediaControls.play == true) {
+
+            // clear the timer when playback starts, just to be
+            // sure that we don't get two timers at once
+            clearInterval(playbackTimer);
+
+            // create a timer to play back the game
+            playbackTimer = setInterval( function() {
               let tmp = getMovePlayback('next');
               if (tmp !== undefined) {
                 playerLoc = "#" + tmp.row + "x" + tmp.col;
                 setPlayerLoc();
               }
-              else break;
-
-              (async function intermittent() {
-                await sleep(500);
-              })();
-            }
+            }, 250);
+            
             break;
           }
           
           case 'media_controls_pause' : {
             for (control in mediaControls) {
               mediaControls.control = false;
+
+              // pause playback... not sure what .play is for
+              mediaControls.play = false;
+              clearInterval(playbackTimer);
+
             }
             break;
           }
