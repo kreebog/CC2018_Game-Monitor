@@ -46,16 +46,19 @@ html(lang='en')
                   div &#11244;
                 div(id="movementBtnGroupRight")
                   div &#11246;
-                  button(class='movement_btns' id='btn_Jump_E') J
-                  button(class='movement_btns' id='btn_move_E') M
                   button(class='movement_btns' id='btn_look_E') L
+                  button(class='movement_btns' id='btn_move_E') M
+                  button(class='movement_btns' id='btn_Jump_E') J
               div(id="movementBtnGroupDown") &#11247;
-                button(class='movement_btns' id='btn_Jump_S') J
-                button(class='movement_btns' id='btn_move_S') M
                 button(class='movement_btns' id='btn_look_S') L
+                button(class='movement_btns' id='btn_move_S') M
+                button(class='movement_btns' id='btn_Jump_S') J
               div(id="movementBtnGroupStandWrite")
                 button(class='bg-primary' id='btn_stand') Stand
                 button(class='bg-primary' id='btn_write') Write
+                button(class='bg-primary' id='btn_look') Look
+                button(class='bg-primary' id='btn_jump') Jump
+
         .container(id='gameActivity')
           h3.my-3 Activity
           table.table.table-sm.bg_transparent.text-center.small
@@ -164,6 +167,9 @@ html(lang='en')
         case 'E': t = 'east'; break;
         case 'W': t = 'west'; break;
       }
+
+      if (buttonId == 'btn_look' || buttonId == 'btn_jump') t = 'none';
+
       ret += t;
 
     console.log(ret);
