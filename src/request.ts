@@ -12,12 +12,12 @@ const log = Logger.getInstance();
  * @param url - URL to request
  * @param callback - Callback to send response data to
  */
-export function doRequest(url: string, timeout: number, callback: Function) {
+export function doGet(url: string, timeout: number, callback: Function) {
     let fnName = format('doRequest("%s" -> "%s")', arguments[0], arguments[1], arguments[2].name);
     let start = Date.now();
     log.debug(__filename, fnName, 'Initiating request.');
 
-    request({ uri: url, timeout: timeout }, (err, res, body) => {
+    request.get({ uri: url, timeout: timeout }, (err, res, body) => {
         // if there's an error during request, log it and eat the response
         if (err) {
             log.error(__filename, fnName, format('Error from %s %s', url, log.getLogLevel() == LOG_LEVELS.TRACE ? '\n' + err.stack : err.message));

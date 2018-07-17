@@ -1,0 +1,18 @@
+doctype html
+html(lang='en')
+    head
+        include view-head.pug
+    body
+        .container-fluid.text-light
+            .row
+                .col
+                    .text-monospace.border-left-0.border-right-0(id='view-header' style='border: 1px solid white;')
+                        h2(id='view-title' style='color: white;') Game Viewer - Game Not Found
+            .row
+                .col
+                    .container(id='data')
+        include view-foot.pug
+        script. 
+            let url = '!{gameUrl}';
+            loadGame(url);
+

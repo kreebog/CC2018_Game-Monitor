@@ -1,0 +1,112 @@
+body {
+    background-color: black;
+    color: white;
+}
+
+#maze_container {
+    color: black;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+    display: inline-block;
+    /* margin-left: 25px; */
+}
+
+.maze_row {
+    border: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.maze_cell {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 400;
+    text-align: center;
+    border: dashed 1px rgba(255, 255, 255, 0.2);
+    border-style: dashed;
+    background-color: rgba(255, 255, 255, 0.1);
+    height: 50px;
+    width: 50px;
+    margin: 0;
+    padding: 0;
+    /*    content: url('/views/images/stone_gray_1.png'); */
+}
+
+.path {
+    background-color: rgba(0, 128, 0, 0.1);
+}
+
+.trap-bear {
+    background-image: url('/views/images/bear-trap-tile.png');
+    background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-position: 7px 8px;
+}
+
+.trap-pit {
+    background-image: url('/views/images/pit-trap-tile.png');
+    background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-position: 7px 8px;
+}
+
+.trap-flame {
+    background-image: url('/views/images/flame-trap-tile.png');
+    background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-position: 7px 8px;
+}
+
+.lava {
+    border: solid 4px black !important;
+    animation-name: cell-lava;
+    animation-duration: 0.25s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate-reverse;
+}
+
+@keyframes cell-lava {
+    from {
+        background-color: rgba(256, 0, 0, 0.75);
+    }
+    to {
+        background-color: rgba(256, 100, 0, 0.75);
+    }
+}
+
+.start {
+    border-top: dashed 5px rgba(256, 0, 0, 1);
+}
+
+.finish {
+    border-bottom: dashed 5px rgba(0, 255, 0, 1);
+}
+
+.bot-badge {
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+#media_controls_rew,
+#media_controls_back,
+#media_controls_play,
+#media_controls_pause,
+#media_controls_forward,
+#media_controls_ffw {
+    color: white;
+    font-size: 26px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+#game_action,
+#game {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+}
