@@ -55,6 +55,14 @@ function startServer() {
             log.debug(__filename, req.url, 'Liveness probe.');
             res.status(200).send();
         });
+        app.get('/view/:gameId', function (req, res) {
+            let gameId = req.params.gameId;
+            let gameUrl = consts.GAME_SVC_URL_EXT + '/game/' + gameId;
+            res.render('view', {
+                host: req.headers.host,
+                gameUrl: gameUrl
+            });
+        });
         // handle index page request
         app.get(['/', '/index'], function (req, res) {
             res.render('index', {

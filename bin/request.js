@@ -15,11 +15,11 @@ const log = cc2018_ts_lib_1.Logger.getInstance();
  * @param url - URL to request
  * @param callback - Callback to send response data to
  */
-function doRequest(url, timeout, callback) {
+function doGet(url, timeout, callback) {
     let fnName = util_1.format('doRequest("%s" -> "%s")', arguments[0], arguments[1], arguments[2].name);
     let start = Date.now();
     log.debug(__filename, fnName, 'Initiating request.');
-    request_1.default({ uri: url, timeout: timeout }, (err, res, body) => {
+    request_1.default.get({ uri: url, timeout: timeout }, (err, res, body) => {
         // if there's an error during request, log it and eat the response
         if (err) {
             log.error(__filename, fnName, util_1.format('Error from %s %s', url, log.getLogLevel() == Logger_1.LOG_LEVELS.TRACE ? '\n' + err.stack : err.message));
@@ -46,5 +46,5 @@ function doRequest(url, timeout, callback) {
         callback(res, body, err);
     });
 }
-exports.doRequest = doRequest;
+exports.doGet = doGet;
 //# sourceMappingURL=request.js.map
