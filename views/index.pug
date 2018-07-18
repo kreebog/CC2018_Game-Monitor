@@ -221,12 +221,12 @@ html(lang='en')
     // select box for step/fast
     $( "#step_switch" ).change(function() {
       if ($('#step_switch').val() == 'step') {
-        let FFORWARD_SPEED = 1;
-        let REWIND_SPEED = 1;
+        FFORWARD_SPEED = 1;
+        REWIND_SPEED = 1;
       }
       else {
-        let FFORWARD_SPEED = 200;
-        let REWIND_SPEED = 200;
+        FFORWARD_SPEED = 200;
+        REWIND_SPEED = 200;
       }
       
     });
@@ -459,19 +459,22 @@ html(lang='en')
                 clearInterval(playbackTimer);
                 
                   tmp = '';
-                  while (tmp != undefined) {
+                  while (true) {
                     tmp = getMovePlayback('prev');
-                    playerLoc = "#" + tmp.row + "x" + tmp.col;
-                    setPlayerLoc();
+                    if (tmp != undefined) {
+                      playerLoc = "#" + tmp.row + "x" + tmp.col;
+                      setPlayerLoc();
 
-                    // update engrams
-                    updateEngrams(movesList[currentMove].engram);
+                      // update engrams
+                      updateEngrams(movesList[currentMove].engram);
 
-                    // update scores at each interval
-                    updateScores(movesList[currentMove].score.gameRound, 
-                      movesList[currentMove].score.moveCount, 
-                      movesList[currentMove].score.backtrackCount, 
-                      movesList[currentMove].score.bonusPoints);
+                      // update scores at each interval
+                      updateScores(movesList[currentMove].score.gameRound, 
+                        movesList[currentMove].score.moveCount, 
+                        movesList[currentMove].score.backtrackCount, 
+                        movesList[currentMove].score.bonusPoints);
+                    }
+                    else break;
                   }
                   
               break;
@@ -484,21 +487,25 @@ html(lang='en')
                 
                 if (REWIND_SPEED == 1) {  // single move per click
                     tmp = getMovePlayback('prev');
-                    playerLoc = "#" + tmp.row + "x" + tmp.col;
-                    setPlayerLoc();
+                    if (tmp != undefined) {
+                      playerLoc = "#" + tmp.row + "x" + tmp.col;
+                      setPlayerLoc();
 
-                    // update engrams
-                    updateEngrams(movesList[currentMove].engram);
+                      // update engrams
+                      updateEngrams(movesList[currentMove].engram);
 
-                    // update scores at each interval
-                    updateScores(movesList[currentMove].score.gameRound, 
-                      movesList[currentMove].score.moveCount, 
-                      movesList[currentMove].score.backtrackCount, 
-                      movesList[currentMove].score.bonusPoints);
+                      // update scores at each interval
+                      updateScores(movesList[currentMove].score.gameRound, 
+                        movesList[currentMove].score.moveCount, 
+                        movesList[currentMove].score.backtrackCount, 
+                        movesList[currentMove].score.bonusPoints);
+                    }
                 }
 
                 else {  // high speed movement
                   let tmp = '';
+                  $('#media_controls_pause').show();
+                  $('#media_controls_play').hide();
                   playbackTimer = setInterval(function() {
                     tmp = getMovePlayback('prev');
                     if (tmp !== undefined) {
@@ -518,6 +525,8 @@ html(lang='en')
                       
                     } else { // getMovePlayback returned undefined
                       clearInterval(playbackTimer);
+                      $('#media_controls_pause').hide();
+                      $('#media_controls_play').show();
                     } 
                   }, REWIND_SPEED);
                 }  
@@ -565,21 +574,28 @@ html(lang='en')
           
           case 'media_controls_forward' : {
               clearInterval(playbackTimer);
+              let tmp = '';
                 if (FFORWARD_SPEED == 1) {  // single move per click
-                    tmp = getMovePlayback('prev');
-                    playerLoc = "#" + tmp.row + "x" + tmp.col;
-                    setPlayerLoc();
+                    tmp = getMovePlayback('next');
+                    if (tmp != undefined) {
+                      playerLoc = "#" + tmp.row + "x" + tmp.col;
+                      setPlayerLoc();
 
-                    // update engrams
-                    updateEngrams(movesList[currentMove].engram);
+                      // update engrams
+                      updateEngrams(movesList[currentMove].engram);
 
-                    // update scores at each interval
-                    updateScores(movesList[currentMove].score.gameRound, 
-                      movesList[currentMove].score.moveCount, 
-                      movesList[currentMove].score.backtrackCount, 
-                      movesList[currentMove].score.bonusPoints);
+                      // update scores at each interval
+                      updateScores(movesList[currentMove].score.gameRound, 
+                        movesList[currentMove].score.moveCount, 
+                        movesList[currentMove].score.backtrackCount, 
+                        movesList[currentMove].score.bonusPoints);
+                    }
+
                 } else {
                       let tmp = '';
+
+                      $('#media_controls_pause').show();
+                      $('#media_controls_play').hide();
                       playbackTimer = setInterval(function() {
                         tmp = getMovePlayback('next');
                         if (tmp !== undefined) {
@@ -593,6 +609,8 @@ html(lang='en')
                         }
                         else {
                           clearInterval(playbackTimer);
+                          $('#media_controls_pause').hide();
+                          $('#media_controls_play').show();
                         }
                       }, FFORWARD_SPEED);
                 }
