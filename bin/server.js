@@ -56,11 +56,15 @@ function startServer() {
             res.status(200).send();
         });
         app.get('/view/:gameId', function (req, res) {
-            let gameId = req.params.gameId;
-            let gameUrl = consts.GAME_SVC_URL_EXT + '/game/' + gameId;
-            res.render('view', {
+            let gameViewId = req.params.gameId;
+            let gameViewUrl = consts.GAME_SVC_URL_EXT + '/game/' + gameViewId;
+            res.render('index', {
                 host: req.headers.host,
-                gameUrl: gameUrl
+                gamesUrl: consts.GAME_SVC_URL_EXT + '/games',
+                gamesListRefreshRate: consts.GAME_LIST_REFRESH_RATE,
+                baseActionUrl: consts.GAME_SVC_URL_EXT + '/game/action/',
+                gameViewUrl: gameViewUrl,
+                gameViewId: gameViewId
             });
         });
         // handle index page request
@@ -95,12 +99,12 @@ function startServer() {
 }
 // respond to process interrupt signals
 process.on('SIGINT', function onSigInt() {
-    log.info(__filename, 'onSigInt()', 'Got SIGINT - Exiting applicaton...');
+    log.info(__filename, 'onSigInt()', 'Got SIGINT - Exiting application...');
     doShutdown();
 });
-// respond to process terminiation signals
+// respond to process termination signals
 process.on('SIGTERM', function onSigTerm() {
-    log.info(__filename, 'onSigTerm()', 'Got SIGTERM - Exiting applicaton...');
+    log.info(__filename, 'onSigTerm()', 'Got SIGTERM - Exiting application...');
     doShutdown();
 });
 /**
@@ -109,6 +113,6 @@ process.on('SIGTERM', function onSigTerm() {
 function doShutdown() {
     log.info(__filename, 'doShutDown()', 'Closing HTTP Server connections...');
     httpServer.close();
-    log.info(__filename, 'doShutDown()', 'Stoping timers...');
+    log.info(__filename, 'doShutDown()', 'Stopping timers...');
 }
 //# sourceMappingURL=server.js.map

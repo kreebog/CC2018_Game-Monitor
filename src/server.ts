@@ -110,13 +110,13 @@ function startServer() {
 
 // respond to process interrupt signals
 process.on('SIGINT', function onSigInt() {
-    log.info(__filename, 'onSigInt()', 'Got SIGINT - Exiting applicaton...');
+    log.info(__filename, 'onSigInt()', 'Got SIGINT - Exiting application...');
     doShutdown();
 });
 
-// respond to process terminiation signals
+// respond to process termination signals
 process.on('SIGTERM', function onSigTerm() {
-    log.info(__filename, 'onSigTerm()', 'Got SIGTERM - Exiting applicaton...');
+    log.info(__filename, 'onSigTerm()', 'Got SIGTERM - Exiting application...');
     doShutdown();
 });
 
@@ -127,5 +127,5 @@ function doShutdown() {
     log.info(__filename, 'doShutDown()', 'Closing HTTP Server connections...');
     httpServer.close();
 
-    log.info(__filename, 'doShutDown()', 'Stoping timers...');
+    log.info(__filename, 'doShutDown()', 'Stopping timers...');
 }
