@@ -3,14 +3,22 @@ html(lang='en')
     head
         include view-head.pug
     body
-        .container-fluid.text-light
-            .row
-                .col
-                    .text-monospace.border-left-0.border-right-0(id='view-header' style='border: 1px solid white;')
-                        h2(id='view-title' style='color: white;') Game Viewer - Game Not Found
-            .row
-                .col
-                    .container(id='maze-container' style='width:100%;height:100%;')
+        .container-fluid.m-2.h-100
+            .row.m-2(style='border-bottom: solid 2px #222')
+                h2.text-light(id='view-title')
+            .row.m-2.justify-content-center.h-100
+                .col-9.h-100(id='maze-parent')
+                    .container.h-100(id='maze-container')
+                .col-3.m-0.p-0(id='actions-parent')
+                    .container(id='actions-container')
+                        table.table-striped.table-dark.table-hover.small(style='color:antiquewhite')
+                            th(scope='col') Move
+                            th(scope='col') Action
+                            th(scope='col') Direction
+                            th(scope='col') Trophy
+                            th(scope='col') Bonus
+                            tbody(id='action-rows')
+                            
         include view-foot.pug
         script. 
             let url = '!{gameUrl}';
