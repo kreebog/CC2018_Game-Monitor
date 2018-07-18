@@ -17,28 +17,10 @@ function loadGame(gameUrl) {
             // render the maze
             renderMaze(result);
 
-            // render the action stack
-            renderActions(result.actions);
-
             // set player location
             setPlayerPosition(result.player.location.row, result.player.location.col);
         }
     });
-}
-
-function renderActions(actions) {
-    for (x = 0; x < actions.length; x++) {
-        let row = '';
-        row += '<tr style="border:solid 1px #111">';
-        row += '  <td>' + actions[x].score.moveCount + '</td>';
-        row += '  <td>' + actions[x].action + '</td>';
-        row += '  <td>' + actions[x].direction + '</td>';
-        row += '  <td>' + actions[x].trophies.length + '</td>';
-        row += '  <td>' + actions[x].score.bonusPoints + '</td>';
-        row += '</tr>';
-        console.log('appending row: ' + row);
-        $('#action-rows').append(row);
-    }
 }
 
 // Player Location
@@ -67,6 +49,9 @@ function getBotNameById(team, botId) {
 function renderMaze(curGame) {
     let cells = curGame.maze.cells;
     let maze_width = cells[0].length * 50;
+    let parent_width = parseInt($('#maze-container').css('width'));
+
+    let cTxt = '';
 
     // Create new maze container and insert into vpGame
     $('#maze-container').html('');
@@ -128,15 +113,7 @@ function renderMaze(curGame) {
     }
 
     try {
-        var maze_row = document.querySelector('.maze-row');
-        var cols = maze_row.childElementCount;
-
-        var cell = document.querySelector('.maze-cell');
-        var cell_width = parseInt(window.getComputedStyle(cell, null).getPropertyValue('width'), 10);
-
-        maze_width = cols * cell_width;
-
-        resizeContainer(maze_width);
+        resizeContainer();
     } catch (err) {
         console.log('Error in render() during initial maze sizing: ' + err.message);
     }
@@ -147,21 +124,29 @@ window.addEventListener('resize', () => {
     resizeContainer();
 });
 
-function resizeContainer(mazeWidth) {
-    try {
-        var maze_row = document.querySelector('.maze-row');
-        var cols = maze_row.childElementCount;
+function resizeContainer() {
+    // Width of parent container of maze_container
+    let zoom_value = '100%';
+    let rows = $('.maze-row').length;
+    let cols = $('.maze-row')[0].children.length;
+    let multiplier = 500;
 
-        var cell = document.querySelector('.maze-cell');
-        var cell_width = parseInt(window.getComputedStyle(cell, null).getPropertyValue('width'), 10);
+    let maze_width = cols * $('#maze-parent').width();
+    let maze_height = rows * $('#maze-parent').height();
 
-        maze_width = cols * cell_width;
+    let parent_height = $('#maze-parent').height();
+    let parent_width = $('#maze-parent').width();
 
-        // Width of parent container of maze-container
-        let parent_width = parseInt(getComputedStyle(document.getElementById('maze-parent'), null).getPropertyValue('width'), 10);
-        let zoom_value = ((parent_width / maze_width) * 90).toFixed(6).toString() + '%';
-        document.getElementById('maze-container').style.zoom = zoom_value;
-    } catch (err) {
-        console.log('Error in window.resize() event handler: ' + err.message);
+    let zoomW = ((parent_width / maze_width) * multiplier).toFixed(6).toString() + '%';
+    let zoomH = ((parent_height / maze_height) * multiplier).toFixed(6).toString() + '%';
+
+    if (maze_height > maze_width) {
+        zoom_value = ((parent_width / maze_width) * multiplier).toFixed(6).toString() + '%';
+    } else {
+        zoom_value = ((parent_height / maze_height) * multiplier).toFixed(6).toString() + '%';
     }
+
+    $('#maze-container').css('zoom', zoom_value);
+
+    console.log('Zoom: %s', zoom_value);
 } // end resizeContainer
