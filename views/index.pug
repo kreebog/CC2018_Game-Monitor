@@ -28,7 +28,12 @@ html(lang='en')
             span(class="fa fa-forward" style='font-size:26px')
           button(id='media_controls_ffw')
             span(class="fa fa-fast-forward" style='font-size:26px')
+        .d-flex.border-0.px-4.d-none 
         .d-flex.border-0.px-4.d-none "Be Kind, Please Rewind"
+        .d-flex.border-0.px-4.py-4.d-none
+          select(id="step_switch")
+            option(value="step") Step
+            option(value="fast") Zoom
       .card.col-md-3.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game_action')
         table.table.table-sm.bg_transparent.small.text-center(id='curMovement')
           th(scope='col') Movement Actions
@@ -62,18 +67,25 @@ html(lang='en')
 
         .container(id='gameActivity')
           h3.my-3 Activity
-          table.table.table-sm.bg_transparent.text-center.small
+          table.table.table-sm.bg_transparent.text-center.small(id="activity_table")
             th(scope='col') Move
+            th(scope='col') Direction
             th(scope='col') Action
             th(scope='col') Cohesion
-            th(scope='col') Result
             tr
-              td 
-                span(id='actMoveNum') 1
-              td(id='curGameActions')
-                span(id='actAction') 
-                  h1.badge.badge-primary.badge-warning South
               td
+                // move number
+                span 1
+              td
+                // action
+                span
+                  h1.badge.badge-primary.badge-warning Move
+              td
+                // direction
+                span
+                  h1.badge.badge-primary.badge-warning East
+              td
+                // cohesion
                 span(id='actB1')
                   h1.badge.badge-success.bot-badge B1
                 span(id='actB1')
@@ -84,9 +96,8 @@ html(lang='en')
                   h1.badge.badge-danger.bot-badge B4
                 span(id='actB1')
                   h1.badge.badge-success.bot-badge B5
-              td 
-                span(id='actResult') 
-                  h1.badge.badge-success OK
+                span
+                  h1.badge.badge-success.bot-badge B6
           h3.my-3 Current Score
           table.table.table-sm.bg_transparent.text-center.small
               th(scope='col') Round
@@ -144,11 +155,16 @@ html(lang='en')
     let scoresList = new Array(); // two dimensional array holding scores for each action in curGame
 
     // PLAYBACK SPEEDS (1000 = 1 sec)
-    let REWIND_SPEED = 50;
+    // Setting equal to 1 milisecond results in single steps
+    let REWIND_SPEED = 1;
     let PLAY_SPEED = 250;
-    let FFORWARD_SPEED = 50
+    let FFORWARD_SPEED = 1;
 
 
+
+    // default display settings
+    $('#media_controls_pause').hide();
+    $('#curMovement').hide();
 
 
     // Popovers must be initialized with jQuery.
@@ -202,6 +218,20 @@ html(lang='en')
       return ret;
     }
 
+    // select box for step/fast
+    $( "#step_switch" ).change(function() {
+      if ($('#step_switch').val() == 'step') {
+        let FFORWARD_SPEED = 1;
+        let REWIND_SPEED = 1;
+      }
+      else {
+        let FFORWARD_SPEED = 200;
+        let REWIND_SPEED = 200;
+      }
+      
+    });
+
+
     /* Manual movement controls
      */
     var nodes = document.getElementById('curMovement').querySelectorAll('button');
@@ -228,8 +258,6 @@ html(lang='en')
     }
 
 
-    
-    $('#curMovement').hide();
     // true = enable
     // false = disable
     function movement(value) {
@@ -319,6 +347,8 @@ html(lang='en')
 
 
 
+
+
     /* function updateEngrams(strArray)
      * @param   engObj - Object containing strings pertaining to each of the 5 senses:
      * 1) sight, 2) sound, 3) smell, 4) touch, 5) taste. 
@@ -342,17 +372,61 @@ html(lang='en')
 
     function updateActivity() {
 
-      // Move here is different from a scored move, which doesnt include points for standing.
-      $('#actMoveNum').text = currentMove;
+      for (i = currentMove-5; i < currentMove+5; i++ ) {
+        if (movesList[currentMove] != undefined) {
 
-      // Action - are actions color coded? why is a direction listed under action without an action?
-      
-      // Cohesion - comes in as array movesList.botCohesion
-      
-      // Result - what is this? 
-      
-      // unresponsive bots are grayed out. wait... how to display bot cohesion?
-    }
+
+
+        //- h1.badge.badge-primary.badge-warning Move
+        //- 
+        //- y.appendChild(t);
+        //- document.getElementById("myTr").appendChild(y);
+
+        // new row
+        let new_table_row = document.createElement("TR");
+        new_table_row.setAttribute("id", ("activity_row_" + i.toString()));
+
+        // new cell (move #)
+        let new_table_cell_01 = document.createElement("TD");
+        var new_text_node = document.createTextNode(movesList[i].score.moveCount);
+        new_table_cel_01.appendChild(new_text_node);
+        new_table_row.appendChild(new_table_cell_01);
+
+        
+        // new cell (action)
+        let new_table_cell_02 = document.createElement("TD");
+        var new_H1_node_02 = document.createElement("H1");
+        var new_text_node_02 = document.createTextNode(movesList[i].action);
+        new_H1_node_02.appendChild(new_text_node_02);
+        new_H1_node_02.setAttribute("class", ("badge badge-primary badge-warning"));
+        new_table_cell_02.appendChild(new_H1_node_02);
+        new_table_row.appendChild(new_table_cell_02);
+
+
+        // new cell (bot cohesion)
+
+        // append row to table
+        document.getElementById("activity_table").appendChild(new_table_row);
+
+
+
+        // Move 
+
+        // Action
+        
+
+        // Direction
+        movesList[i].direction;
+
+        // Cohesion - comes in as array movesList.botCohesion
+        // unresponsive bots are grayed out. wait... how to display bot cohesion?
+
+
+
+
+        }
+      }
+    } // end updateActivity()
 
 
 
@@ -375,7 +449,8 @@ html(lang='en')
     var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
     for(var i = 0 ; i < media_buttons.length ; i++) {
       media_buttons[i].addEventListener('click', function() {
-        
+        $('#media_controls_pause').hide();
+        $('#media_controls_play').show();
         switch (this.id) {
 
           case 'media_controls_rew' : {
@@ -383,36 +458,9 @@ html(lang='en')
                 // sure that we don't get two timers at once
                 clearInterval(playbackTimer);
                 
-                tmp = '';
-                while (tmp != undefined) {
-                  tmp = getMovePlayback('prev');
-                  playerLoc = "#" + tmp.row + "x" + tmp.col;
-                  setPlayerLoc();
-
-                  // update engrams
-                  updateEngrams(movesList[currentMove].engram);
-
-                  // update scores at each interval
-                  updateScores(movesList[currentMove].score.gameRound, 
-                    movesList[currentMove].score.moveCount, 
-                    movesList[currentMove].score.backtrackCount, 
-                    movesList[currentMove].score.bonusPoints);
-                }
-                
-              break;
-          }
-          
-          case 'media_controls_back' : {
-                // clear the timer to be
-                // sure that we don't get two timers at once
-                clearInterval(playbackTimer);
-
-                let tmp = '';
-                playbackTimer = setInterval(function() {
-                  tmp = getMovePlayback('prev');
-                  if (tmp !== undefined) {
-
-                    // update player location
+                  tmp = '';
+                  while (tmp != undefined) {
+                    tmp = getMovePlayback('prev');
                     playerLoc = "#" + tmp.row + "x" + tmp.col;
                     setPlayerLoc();
 
@@ -424,12 +472,55 @@ html(lang='en')
                       movesList[currentMove].score.moveCount, 
                       movesList[currentMove].score.backtrackCount, 
                       movesList[currentMove].score.bonusPoints);
-                    
-                  } else { // getMovePlayback returned undefined
-                    clearInterval(playbackTimer);
-                  } 
-                }, REWIND_SPEED);
+                  }
                   
+              break;
+          }
+          
+          case 'media_controls_back' : {
+                // clear the timer to be
+                // sure that we don't get two timers at once
+                clearInterval(playbackTimer);
+                
+                if (REWIND_SPEED == 1) {  // single move per click
+                    tmp = getMovePlayback('prev');
+                    playerLoc = "#" + tmp.row + "x" + tmp.col;
+                    setPlayerLoc();
+
+                    // update engrams
+                    updateEngrams(movesList[currentMove].engram);
+
+                    // update scores at each interval
+                    updateScores(movesList[currentMove].score.gameRound, 
+                      movesList[currentMove].score.moveCount, 
+                      movesList[currentMove].score.backtrackCount, 
+                      movesList[currentMove].score.bonusPoints);
+                }
+
+                else {  // high speed movement
+                  let tmp = '';
+                  playbackTimer = setInterval(function() {
+                    tmp = getMovePlayback('prev');
+                    if (tmp !== undefined) {
+
+                      // update player location
+                      playerLoc = "#" + tmp.row + "x" + tmp.col;
+                      setPlayerLoc();
+
+                      // update engrams
+                      updateEngrams(movesList[currentMove].engram);
+
+                      // update scores at each interval
+                      updateScores(movesList[currentMove].score.gameRound, 
+                        movesList[currentMove].score.moveCount, 
+                        movesList[currentMove].score.backtrackCount, 
+                        movesList[currentMove].score.bonusPoints);
+                      
+                    } else { // getMovePlayback returned undefined
+                      clearInterval(playbackTimer);
+                    } 
+                  }, REWIND_SPEED);
+                }  
               break;
           }
           
@@ -437,6 +528,9 @@ html(lang='en')
                 // clear the timer to be
                 // sure that we don't get two timers at once
                 clearInterval(playbackTimer);
+
+              $('#media_controls_play').hide();
+              $('#media_controls_pause').show();
 
                 let count = currentMove;
                 // create a timer to play back the game
@@ -464,28 +558,44 @@ html(lang='en')
 
           case 'media_controls_pause' : {
               clearInterval(playbackTimer);
+              $('#media_controls_pause').hide();
+              $('#media_controls_play').show();
               break;
           }
           
           case 'media_controls_forward' : {
               clearInterval(playbackTimer);
-              let tmp = '';
-              playbackTimer = setInterval(function() {
-                tmp = getMovePlayback('next');
-                if (tmp !== undefined) {
-                  playerLoc = "#" + tmp.row + "x" + tmp.col;
-                  setPlayerLoc();
-                  // update scores at each interval
-                  updateScores(movesList[currentMove].score.gameRound, 
-                    movesList[currentMove].score.moveCount, 
-                    movesList[currentMove].score.backtrackCount, 
-                    movesList[currentMove].score.bonusPoints);
-                }
-                else {
-                  clearInterval(playbackTimer);
-                }
+                if (FFORWARD_SPEED == 1) {  // single move per click
+                    tmp = getMovePlayback('prev');
+                    playerLoc = "#" + tmp.row + "x" + tmp.col;
+                    setPlayerLoc();
 
-              }, FFORWARD_SPEED);
+                    // update engrams
+                    updateEngrams(movesList[currentMove].engram);
+
+                    // update scores at each interval
+                    updateScores(movesList[currentMove].score.gameRound, 
+                      movesList[currentMove].score.moveCount, 
+                      movesList[currentMove].score.backtrackCount, 
+                      movesList[currentMove].score.bonusPoints);
+                } else {
+                      let tmp = '';
+                      playbackTimer = setInterval(function() {
+                        tmp = getMovePlayback('next');
+                        if (tmp !== undefined) {
+                          playerLoc = "#" + tmp.row + "x" + tmp.col;
+                          setPlayerLoc();
+                          // update scores at each interval
+                          updateScores(movesList[currentMove].score.gameRound, 
+                            movesList[currentMove].score.moveCount, 
+                            movesList[currentMove].score.backtrackCount, 
+                            movesList[currentMove].score.bonusPoints);
+                        }
+                        else {
+                          clearInterval(playbackTimer);
+                        }
+                      }, FFORWARD_SPEED);
+                }
               break;
           }
           
