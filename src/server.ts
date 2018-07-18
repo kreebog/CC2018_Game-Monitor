@@ -64,12 +64,15 @@ function startServer() {
         });
 
         app.get('/view/:gameId', function(req, res) {
-            let gameId = req.params.gameId;
-            let gameUrl = consts.GAME_SVC_URL_EXT + '/game/' + gameId;
-
-            res.render('view', {
+            let gameViewId = req.params.gameId;
+            let gameViewUrl = consts.GAME_SVC_URL_EXT + '/game/' + gameViewId;
+            res.render('index', {
                 host: req.headers.host,
-                gameUrl: gameUrl
+                gamesUrl: consts.GAME_SVC_URL_EXT + '/games',
+                gamesListRefreshRate: consts.GAME_LIST_REFRESH_RATE,
+                baseActionUrl: consts.GAME_SVC_URL_EXT + '/game/action/',
+                gameViewUrl: gameViewUrl,
+                gameViewId: gameViewId
             });
         });
 
