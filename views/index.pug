@@ -28,6 +28,7 @@ html(lang='en')
             span(class="fa fa-forward" style='font-size:26px')
           button(id='media_controls_ffw')
             span(class="fa fa-fast-forward" style='font-size:26px')
+        .d-flex.border-0.px-4.d-none "Be Kind, Please Rewind"
       .card.col-md-3.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game_action')
         table.table.table-sm.bg_transparent.small.text-center(id='curMovement')
           th(scope='col') Movement Actions
@@ -98,7 +99,22 @@ html(lang='en')
                 td(id='curGame_backtracks') 0
                 td(id='curGame_bonus') 0
           h3.my-3 Move Result
-          .container.small.outcomes-container(id='curGame_outcomes') No activity reported...
+          .container.small.outcomes-container(id='curGame_outcomes') 
+            div(style="display: flex; justify-content: start;")
+              div.mr-2 Sight: 
+              div.mr-2(id='engramSight') No activity reported...
+            div(style="display: flex; justify-content: start;")
+              div.mr-2 Sound:
+              div.engrams(id='engramSound')
+            div(style="display: flex; justify-content: start;")
+              div.mr-2 Smell:  
+              div.engrams(id='engramSmell')
+            div(style="display: flex; justify-content: start;")
+              div.mr-2 Touch:
+              div.engrams(id='engramTouch')
+            div(style="display: flex; justify-content: start;")
+              div.mr-2 Taste: 
+              div.engrams(id='engramTaste')
     .row
       .col-12(id='games')
         h3 Current Games
@@ -106,9 +122,7 @@ html(lang='en')
   // Footer
   include foot.pug
 
-  // Menu
-  // include menu.pug
-  
+ 
   // AJAX functions go here...
   script(src='/views/js/resize.js')
   script.
@@ -119,11 +133,19 @@ html(lang='en')
     let playerLoc = '#0x0';
     let lastPlayerLoc = '#0x0';
     let lastMoveFetched = 0;
-    let stopGettingGameData = false;
     let movesList = new Array();
     let currentMove = 0;
     let mediaControls = {rew: false, back: false, play: false, pause: false, forward: false, ffw: false};
     let playbackTimer; // used to control auto playback interval timer 
+    let scoresList = new Array(); // two dimensional array holding scores for each action in curGame
+
+    // PLAYBACK SPEEDS (1000 = 1 sec)
+    let REWIND_SPEED = 50;
+    let PLAY_SPEED = 250;
+    let FFORWARD_SPEED = 50
+
+
+
 
     // Popovers must be initialized with jQuery.
     // Calling twice will disable all popovers in the document:
@@ -176,7 +198,8 @@ html(lang='en')
       return ret;
     }
 
-    // load button event handlers
+    /* Manual movement controls
+     */
     var nodes = document.getElementById('curMovement').querySelectorAll('button');
     for(var i = 0 ; i < nodes.length ; i++) {
        
@@ -188,9 +211,11 @@ html(lang='en')
             $('#curGame_bonus').html(result.score.bonusPoints);
             if (result.outcome !== undefined) $('#curGame_outcomes').html(result.outcome.join('<br>'));
             if (result.engram !== undefined) $('#curGame_outcomes').append('<br>' + result.engram.sight + '<br>' + result.engram.sound + '<br>' + result.engram.smell + '<br>' + result.engram.touch + '<br>' + result.engram.taste + '<br>');
-          
+            movesList = [];
             playerLoc = '#' + result.location.row + 'x' + result.location.col;
             setPlayerLoc();
+            
+            getGameData();
           }
         });
         
@@ -209,11 +234,8 @@ html(lang='en')
     function setPlayerLoc() {
       $(lastPlayerLoc).html('');
       $(playerLoc).html('@');
-      console.log(playerLoc);
-
       console.log('moving from %s to %s', lastPlayerLoc, playerLoc);
       lastPlayerLoc = playerLoc.toString();
-
     }
 
     // refreshes the current games list
@@ -276,8 +298,8 @@ html(lang='en')
             setPlayerLoc();
             lastMoveFetched = 0;
             movesList = [];
-            currentMove = 0;
             getGameData();
+            
         }});
 
       }
@@ -289,134 +311,212 @@ html(lang='en')
 
 
 
-    var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
-    for(var i = 0 ; i < media_buttons.length ; i++) {
-      media_buttons[i].addEventListener('click', function() {
-
-       
-        switch (this.id) {
-          case 'media_controls_rew' : {
-            // reset all controls to false
-            for (control in mediaControls) {
-              mediaControls.control = false;
-            }
-            // set rew to true
-            mediaControls.rew = true;
-            // while true, get prev, pause, repeat
-            while (mediaControls.rew == true) {
-              let tmp = getMovePlayback('prev');
-              if (tmp !== undefined) {
-                playerLoc = "#" + tmp.row + "x" + tmp.col;
-                setPlayerLoc();
-              }
-              else break;
-              
-              intermittent();
-
-            }
-            break;
-          }
-          
-          case 'media_controls_back' : {
-            for (control in mediaControls) {
-              mediaControls.control = false;
-            }
-
-            let tmp = getMovePlayback('prev');
-            if (tmp !== undefined) {
-                playerLoc = "#" + tmp.row + "x" + tmp.col;
-                setPlayerLoc();
-              }
-              
-            break;
-          }
-          
-          case 'media_controls_play' : {
-            // reset all controls to false
-            for (control in mediaControls) {
-              mediaControls.control = false;
-            }
-
-            mediaControls.play = true;
-
-            // clear the timer when playback starts, just to be
-            // sure that we don't get two timers at once
-            clearInterval(playbackTimer);
-
-            // create a timer to play back the game
-            playbackTimer = setInterval( function() {
-              let tmp = getMovePlayback('next');
-              if (tmp !== undefined) {
-                playerLoc = "#" + tmp.row + "x" + tmp.col;
-                setPlayerLoc();
-              }
-            }, 250);
-            
-            break;
-          }
-          
-          case 'media_controls_pause' : {
-            for (control in mediaControls) {
-              mediaControls.control = false;
-
-              // pause playback... not sure what .play is for
-              mediaControls.play = false;
-              clearInterval(playbackTimer);
-
-            }
-            break;
-          }
-          
-          case 'media_controls_forward' : {
-            for (control in mediaControls) {
-              mediaControls.control = false;
-            }
-              let tmp = getMovePlayback('next');
-              if (tmp !== undefined) {
-                playerLoc = "#" + tmp.row + "x" + tmp.col;
-                setPlayerLoc();
-              }
-            break;
-          }
-          
-          case 'media_controls_ffw' : {
-            for (control in mediaControls) {
-              mediaControls.control = false;
-            }
-            mediaControls.ffw = true;
-            // while play is true, get next move, pause, repeat
-            while (mediaControls.ffw == true) {
-              let tmp = getMovePlayback('next');
-              if (tmp !== undefined) {
-                playerLoc = "#" + tmp.row + "x" + tmp.col;
-                setPlayerLoc();
-              }
-              else break;
-              (async function intermittent() {
-                await sleep(500);
-              })();
-            }
 
 
-            break;
-          }
-        }
-      })
+    /* function updateEngrams(strArray)
+     * @param   engObj - Object containing strings pertaining to each of the 5 senses:
+     * 1) sight, 2) sound, 3) smell, 4) touch, 5) taste. 
+     *
+     */
+    function updateEngrams(engObj) {
+      
+          (engObj.sight.length > 1) ? $('#engramSight').html(engObj.sight) : $('#engramSight').html(' ');
+
+          (engObj.sound.length > 1) ? $('#engramSound').html(engObj.sound) : $('#engramSound').html(' ');
+
+          (engObj.smell.length > 1) ? $('#engramSmell').html(engObj.smell) : $('#engramSmell').html(' ');
+
+          (engObj.touch.length > 1) ? $('#engramTouch').html(engObj.touch) : $('#engramTouch').html(' ');
+
+          (engObj.taste.length > 1) ? $('#engramTaste').html(engObj.taste) : $('#engramTaste').html(' ');
     }
 
 
 
 
-    /* Function getMovePlayback(prev | next)
-     * @return object of type {row: y, col: x}
+    function updateActivity() {
+
+      // Move here is different from a scored move, which doesnt include points for standing.
+      $('#actMoveNum').text = currentMove;
+
+      // Action - are actions color coded? why is a direction listed under action without an action?
+      
+      // Cohesion - comes in as array movesList.botCohesion
+      
+      // Result - what is this? 
+      
+      // unresponsive bots are grayed out. wait... how to display bot cohesion?
+    }
+
+
+
+    /* function updateScores(round, move, back, bonus)
+     * @param   round - updates current score >> Round
+     * @param   move  - updates current score >> Moves
+     * @param   back  - updates crrent score >> Backtracks
+     * @param   bonus - updates current score >> Bonus (points)
+     */
+    function updateScores(round, move, back, bonus) {
+      $('#curGame_round').text(round);
+      $('#curGame_moves').text(move);
+      $('#curGame_backtracks').text(back);
+      $('#curGame_bonus').text(bonus);
+    }
+
+
+    /* Playback controls:
+    */
+    var media_buttons = document.getElementById('media_controls').querySelectorAll('button');
+    for(var i = 0 ; i < media_buttons.length ; i++) {
+      media_buttons[i].addEventListener('click', function() {
+        
+        switch (this.id) {
+
+          case 'media_controls_rew' : {
+                // clear the timer to be
+                // sure that we don't get two timers at once
+                clearInterval(playbackTimer);
+                
+                let tmp = '';
+                playbackTimer = setInterval(function() {
+                  tmp = getMovePlayback('prev');
+                  if (tmp !== undefined) {
+                    
+                    // update player location
+                    playerLoc = "#" + tmp.row + "x" + tmp.col;
+                    setPlayerLoc();
+
+                    // update engrams
+                    updateEngrams(movesList[currentMove].engram);
+
+                    // update scores at each interval
+                    updateScores(movesList[currentMove].score.gameRound, 
+                      movesList[currentMove].score.moveCount, 
+                      movesList[currentMove].score.backtrackCount, 
+                      movesList[currentMove].score.bonusPoints);
+                    
+                  } else { // getMovePlayback returned undefined
+                    clearInterval(playbackTimer);
+                  } 
+                }, REWIND_SPEED);
+                
+              break;
+          }
+          
+          case 'media_controls_back' : {
+                // clear the timer to be
+                // sure that we don't get two timers at once
+                clearInterval(playbackTimer);
+
+                let tmp = getMovePlayback('prev');
+                if (tmp !== undefined) {
+                    playerLoc = "#" + tmp.row + "x" + tmp.col;
+                    setPlayerLoc();
+                    // update scores at each interval
+                    updateScores(movesList[currentMove].score.gameRound, 
+                      movesList[currentMove].score.moveCount, 
+                      movesList[currentMove].score.backtrackCount, 
+                      movesList[currentMove].score.bonusPoints);
+                    // update engrams
+                    updateEngrams(movesList[currentMove].engram)
+                    // 
+                }
+                  
+              break;
+          }
+          
+          case 'media_controls_play' : {
+                // clear the timer to be
+                // sure that we don't get two timers at once
+                clearInterval(playbackTimer);
+
+                let count = currentMove;
+                // create a timer to play back the game
+                playbackTimer = setInterval( function() {
+                let tmp = getMovePlayback('next');
+                if (tmp !== undefined) {
+
+                  // reset character position to beginning
+                  playerLoc = "#" + tmp.row + "x" + tmp.col;
+                  setPlayerLoc();
+
+                  // update scores at each interval
+                  updateScores(movesList[currentMove].score.gameRound, 
+                    movesList[currentMove].score.moveCount, 
+                    movesList[currentMove].score.backtrackCount, 
+                    movesList[currentMove].score.bonusPoints);
+                }
+                else {  // getMovePlayback returned undefined
+                  clearInterval(playbackTimer);
+                }
+              }, PLAY_SPEED);
+              
+              break;
+          }
+
+          case 'media_controls_pause' : {
+              clearInterval(playbackTimer);
+              break;
+          }
+          
+          case 'media_controls_forward' : {
+              clearInterval(playbackTimer);
+              let tmp = getMovePlayback('next');
+              if (tmp !== undefined) {
+                playerLoc = "#" + tmp.row + "x" + tmp.col;
+                setPlayerLoc();
+                  // update scores at each interval
+                  updateScores(movesList[currentMove].score.gameRound, 
+                    movesList[currentMove].score.moveCount, 
+                    movesList[currentMove].score.backtrackCount, 
+                    movesList[currentMove].score.bonusPoints);
+              }
+              break;
+          }
+          
+          case 'media_controls_ffw' : {
+              clearInterval(playbackTimer);
+              let tmp = '';
+              playbackTimer = setInterval(function() {
+                tmp = getMovePlayback('next');
+                if (tmp !== undefined) {
+                  playerLoc = "#" + tmp.row + "x" + tmp.col;
+                  setPlayerLoc();
+                  // update scores at each interval
+                  updateScores(movesList[currentMove].score.gameRound, 
+                    movesList[currentMove].score.moveCount, 
+                    movesList[currentMove].score.backtrackCount, 
+                    movesList[currentMove].score.bonusPoints);
+                }
+                else {
+                  clearInterval(playbackTimer);
+                }
+
+              }, FFORWARD_SPEED);
+
+          }
+        }
+      });
+    } //  end playback controls
+
+
+
+
+    /* Function getMovePlayback(prev | next | current)
+     * Get a move in sequence.
+     * @param   iteration - move to return, if said move exists
+     * @return  object of type {row: y, col: x}
      */
     function getMovePlayback(iteration) {
       switch (iteration) {
         case 'prev' : return (((currentMove-1) in movesList) ? movesList[--currentMove].location : undefined);
-        case 'next' : return (((currentMove) in movesList) ? movesList[currentMove++].location : undefined);
+        case 'next' : return (((currentMove+1) in movesList) ? movesList[++currentMove].location : undefined);
+        case 'current' : return (currentMove !== undefined) ? currentMove : undefined;
       }
-    }
+    } 
 
+
+    // used in getGameData()
     // Simple sleep promises utilizing async/await
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
@@ -425,7 +525,11 @@ html(lang='en')
     async function intermittent() {
       await sleep(2000);
     };
-
+    
+    /* function getGameData()
+     * Returns the game stack, including all kinds of neat stuff
+     * such as moves and corresponding positions, scores, etc...
+     */
     // Get moves stack for current game
     function getGameData() {
       let gameDataURL = 'http://game.code-camp-2018.com/actions/get/' + curGame.id + '?start=' + (lastMoveFetched+1).toString();
@@ -435,8 +539,9 @@ html(lang='en')
             
             (async function intermittent() {
               await sleep(2000);
-              for (action in result) {
-                movesList.push(result[action]);
+              for (i=0; i < result.length; i++) {
+                movesList.push(result[i]);
+                // push scores
               }
               lastMoveFetched = movesList.length;
               console.log("Fetching " + lastMoveFetched + " moves...");
@@ -446,8 +551,10 @@ html(lang='en')
         else {
           // no game data left to fetch...
           // No moves detected since last request.
+          
+          // reset global var:
           lastMoveFetched = 0;
-
+          currentMove = movesList.length - 1;
         }
         
       }, error: function() {
