@@ -225,10 +225,12 @@ html(lang='en')
 
 
     
-    
-    
-      
-
+    $('#curMovement').hide();
+    // true = enable
+    // false = disable
+    function movement(value) {
+      value ? $('#curMovement').show() : $('#curMovement').hide();
+    }
 
     // Player Location
     function setPlayerLoc() {
