@@ -377,11 +377,35 @@ html(lang='en')
                 // sure that we don't get two timers at once
                 clearInterval(playbackTimer);
                 
+                tmp = '';
+                while (tmp != undefined) {
+                  tmp = getMovePlayback('prev');
+                  playerLoc = "#" + tmp.row + "x" + tmp.col;
+                  setPlayerLoc();
+
+                  // update engrams
+                  updateEngrams(movesList[currentMove].engram);
+
+                  // update scores at each interval
+                  updateScores(movesList[currentMove].score.gameRound, 
+                    movesList[currentMove].score.moveCount, 
+                    movesList[currentMove].score.backtrackCount, 
+                    movesList[currentMove].score.bonusPoints);
+                }
+                
+              break;
+          }
+          
+          case 'media_controls_back' : {
+                // clear the timer to be
+                // sure that we don't get two timers at once
+                clearInterval(playbackTimer);
+
                 let tmp = '';
                 playbackTimer = setInterval(function() {
                   tmp = getMovePlayback('prev');
                   if (tmp !== undefined) {
-                    
+
                     // update player location
                     playerLoc = "#" + tmp.row + "x" + tmp.col;
                     setPlayerLoc();
@@ -399,28 +423,6 @@ html(lang='en')
                     clearInterval(playbackTimer);
                   } 
                 }, REWIND_SPEED);
-                
-              break;
-          }
-          
-          case 'media_controls_back' : {
-                // clear the timer to be
-                // sure that we don't get two timers at once
-                clearInterval(playbackTimer);
-
-                let tmp = getMovePlayback('prev');
-                if (tmp !== undefined) {
-                    playerLoc = "#" + tmp.row + "x" + tmp.col;
-                    setPlayerLoc();
-                    // update scores at each interval
-                    updateScores(movesList[currentMove].score.gameRound, 
-                      movesList[currentMove].score.moveCount, 
-                      movesList[currentMove].score.backtrackCount, 
-                      movesList[currentMove].score.bonusPoints);
-                    // update engrams
-                    updateEngrams(movesList[currentMove].engram)
-                    // 
-                }
                   
               break;
           }
@@ -461,21 +463,6 @@ html(lang='en')
           
           case 'media_controls_forward' : {
               clearInterval(playbackTimer);
-              let tmp = getMovePlayback('next');
-              if (tmp !== undefined) {
-                playerLoc = "#" + tmp.row + "x" + tmp.col;
-                setPlayerLoc();
-                  // update scores at each interval
-                  updateScores(movesList[currentMove].score.gameRound, 
-                    movesList[currentMove].score.moveCount, 
-                    movesList[currentMove].score.backtrackCount, 
-                    movesList[currentMove].score.bonusPoints);
-              }
-              break;
-          }
-          
-          case 'media_controls_ffw' : {
-              clearInterval(playbackTimer);
               let tmp = '';
               playbackTimer = setInterval(function() {
                 tmp = getMovePlayback('next');
@@ -493,6 +480,27 @@ html(lang='en')
                 }
 
               }, FFORWARD_SPEED);
+              break;
+          }
+          
+          case 'media_controls_ffw' : {
+              clearInterval(playbackTimer);
+
+              let tmp = '';
+
+              while (tmp != undefined) {
+                tmp = getMovePlayback('next');
+                if (tmp !== undefined) {
+                  playerLoc = "#" + tmp.row + "x" + tmp.col;
+                  setPlayerLoc();
+                    // update scores at each interval
+                    updateScores(movesList[currentMove].score.gameRound, 
+                      movesList[currentMove].score.moveCount, 
+                      movesList[currentMove].score.backtrackCount, 
+                      movesList[currentMove].score.bonusPoints);
+                }
+              }
+              
 
           }
         }
