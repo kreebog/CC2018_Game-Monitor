@@ -127,6 +127,10 @@ html(lang='en')
   script(src='/views/js/resize.js')
   script.
     
+    // gameId and data URLs passed from direct view requests
+    let gameViewUrl = '!{gameViewUrl}';
+    let gameViewId = '!{gameViewId}';
+
     // set up global vars
     let gamesList = new Array();
     let curGame = {gameId:0};
