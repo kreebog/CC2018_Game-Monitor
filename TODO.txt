@@ -1,0 +1,26 @@
+# Monitor activity & cohesion reporting
+1. test updateScore()
+1. wire move actions & scores to playback
+    - write updateActivity
+        - add direction to activity table??
+    - test updateActivity
+2. write updateEngrams()
+    - test updateEngrams()
+3. scratch expandable tree structure? Move action feedback to popover if possible
+4. Scoreboard
+
+
+# Monitor layout
+1. reduce to one nav button
+2. Navbar linear gradient option 1 or 2? (head.pug), see commented duplicate near the top.
+
+
+# Features
+
+1. Replace @ with gif in monitor
+2. Flowing Lava!?!?!
+
+
+# Questions:
+
+1. Game cards update the move count and reset. maze name stays the same.
