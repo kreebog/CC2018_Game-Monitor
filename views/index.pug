@@ -66,8 +66,8 @@ html(lang='en')
                 button(class='bg-primary' id='btn_jump') Jump
 
         .container(id='gameActivity')
-          h3.my-3 Activity
-          table.table.table-sm.bg_transparent.text-center.small(id="activity_table")
+          h3.my-3(style='display:none;') Activity
+          table.hidden.table.table-sm.bg_transparent.text-center.small(id="activity_table" style='display:none;')
             th(scope='col') Move
             th(scope='col') Direction
             th(scope='col') Action
@@ -176,7 +176,7 @@ html(lang='en')
     $('#btn_gameplay_results').hide();
 
     // polling rates
-    const SINGLE_GAME_DATA_POLL = 500;
+    const SINGLE_GAME_DATA_POLL = 250;
     const MULTI_GAME_DATA_POLL = 500;
 
 
@@ -280,7 +280,6 @@ html(lang='en')
             movesList = [];
             playerLoc = '#' + result.location.row + 'x' + result.location.col;
             setPlayerLoc();
-            
             getGameData();
           }
         });
@@ -296,11 +295,21 @@ html(lang='en')
       value ? $('#curMovement').show() : $('#curMovement').hide();
     }
 
+    // cleares player location indicator 
+    function clearPlayerLocs() {
+      for (var y = 0; x < curGame.maze.height; x++ ) {
+        for (var y = 0; y < curGame.maze.width; y++ )  {
+          let cellId = '#' + x + 'x' + y;
+          console.log(cellId);
+          $(cellId).html('.');
+        }
+      }
+    }
+
     // Player Location
     function setPlayerLoc() {
       $(lastPlayerLoc).html('');
       $(playerLoc).html('@');
-      console.log('moving from %s to %s', lastPlayerLoc, playerLoc);
       lastPlayerLoc = playerLoc.toString();
     }
 
@@ -528,6 +537,7 @@ html(lang='en')
                   $('#media_controls_pause').show();
                   $('#media_controls_play').hide();
                   playbackTimer = setInterval(function() {
+                    console.log('Tick: playbackTimer');
                     tmp = getMovePlayback('prev');
                     if (tmp !== undefined) {
 
@@ -564,8 +574,9 @@ html(lang='en')
 
                 // create a timer to play back the game
                 playbackTimer = setInterval( function() {
-                let tmp = getMovePlayback('next');
-                if (tmp !== undefined) {
+                  console.log('Tick: Playback Timer');
+                  let tmp = getMovePlayback('next');
+                  if (tmp !== undefined) {
 
                   // reset character position to beginning
                   playerLoc = "#" + tmp.row + "x" + tmp.col;
@@ -620,6 +631,7 @@ html(lang='en')
                       $('#media_controls_pause').show();
                       $('#media_controls_play').hide();
                       playbackTimer = setInterval(function() {
+                        console.log('Tick: playbackTimer');
                         tmp = getMovePlayback('next');
                         if (tmp !== undefined) {
                           playerLoc = "#" + tmp.row + "x" + tmp.col;
@@ -695,6 +707,7 @@ html(lang='en')
      */
     // Get moves stack for current game in multi-game view
     function getGameData() {
+      console.log('Tick: getGameData');
       let gameDataURL = 'http://game.code-camp-2018.com/actions/get/' + curGame.id + '?start=' + (lastMoveFetched+1).toString();
       $.ajax({url: gameDataURL, success: function(result) {
  
@@ -706,10 +719,11 @@ html(lang='en')
           lastMoveFetched = movesList.length;
           console.log("Fetched " + lastMoveFetched + " moves...");
           currentMove = movesList.length - 1;
+
+          lastPlayerLoc = playerLoc;
           playerLoc = '#' + movesList[currentMove].location.row.toString() +
                       'x' + movesList[currentMove].location.col.toString();
-          lastPlayerLoc = '#' + movesList[currentMove-1].location.row.toString() +
-                          'x' + movesList[currentMove-1].location.col.toString();
+
           setPlayerLoc();
         }
 
@@ -727,6 +741,8 @@ html(lang='en')
     // Get moves stack for current game
     function getGameViewData() {
       
+      console.log('Tick: getGameViewData() : ' + gameViewUrl);
+
         let url_string = gameViewUrl + '?start=' + lastMoveFetched;
         $.ajax({url: url_string, success: function(result) {
 
@@ -737,8 +753,7 @@ html(lang='en')
               }  
             
             lastMoveFetched = movesList.length;
-            console.log("Fetched " + lastMoveFetched + " moves...");
-            
+
             // if maze not yet rendered...
             if (!($('#maze_container').length)) {
               getMazeView();
@@ -750,6 +765,14 @@ html(lang='en')
               lastPlayerLoc = '#' + movesList[currentMove-1].location.row.toString() +
                               'x' + movesList[currentMove-1].location.col.toString();
             setPlayerLoc();
+
+            $('#curGame_round').html(result.score.gameRound);
+            $('#curGame_moves').html(result.score.moveCount);
+            $('#curGame_backtracks').html(result.score.backtrackCount);
+            $('#curGame_bonus').html(result.score.bonusPoints);
+            if (result.outcome !== undefined) $('#curGame_outcomes').html(result.outcome.join('<br>'));
+            if (result.engram !== undefined) $('#curGame_outcomes').append('<br>' + result.engram.sight + '<br>' + result.engram.sound + '<br>' + result.engram.smell + '<br>' + result.engram.touch + '<br>' + result.engram.taste + '<br>');
+
             }
           }
         }, error: function() {
@@ -779,10 +802,6 @@ html(lang='en')
       }
        
       } // end getGameData()
-
-
-
-
 
 
 
@@ -849,25 +868,12 @@ html(lang='en')
     } // END renderGame()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /***** code outside functions *****/
 
 
     if (gameViewUrl != '') {  // Single game-view mode
         // 1. Fetch game data
+        selectGame(gameViewId, gameViewUrl);
         var fetchGameDataTimer = setInterval(getGameViewData, SINGLE_GAME_DATA_POLL);
         // maze data is fetched and rendered (if not already)
         // from within getGameViewData()
