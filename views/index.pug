@@ -33,7 +33,7 @@ html(lang='en')
         .d-flex.border-0.px-4.py-4.d-none
           select(id="step_switch")
             option(value="step") Step
-            option(value="fast") Zoom
+            option(value="fast") Auto step
       .card.col-md-3.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game_action')
         table.table.table-sm.bg_transparent.small.text-center(id='curMovement')
           th(scope='col') Movement Actions
@@ -133,12 +133,21 @@ html(lang='en')
   // Footer
   include foot.pug
 
+
+
+
+
+
+
+
+
  
-  // AJAX functions go here...
+  // JAVASCRIPT 
   script(src='/views/js/resize.js')
   script.
     
     // gameId and data URLs passed from direct view requests
+    // let gameViewUrl = 'http://game.code-camp-2018.com/game/47ddb18a-352a-4f75-b264-c115ea6a39d3';
     let gameViewUrl = '!{gameViewUrl}';
     let gameViewId = '!{gameViewId}';
 
@@ -165,6 +174,28 @@ html(lang='en')
     // default display settings
     $('#media_controls_pause').hide();
     $('#curMovement').hide();
+
+    // Interval timers
+    const GAME_DATA_POLL = 500;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // Popovers must be initialized with jQuery.
@@ -674,9 +705,11 @@ html(lang='en')
      */
     // Get moves stack for current game
     function getGameData() {
+      
       let gameDataURL = 'http://game.code-camp-2018.com/actions/get/' + curGame.id + '?start=' + (lastMoveFetched+1).toString();
       $.ajax({url: gameDataURL, success: function(result) {
-        if (result.status === undefined && result.length > 0) {
+        if (result.status === undefined) {
+          
           console.log("fetching data...");
             
             (async function intermittent() {
@@ -706,9 +739,40 @@ html(lang='en')
 
 
 
+    /* function getGameViewData()
+     * Returns the game stack, including all kinds of neat stuff
+     * such as moves and corresponding positions, scores, etc...
+     */
+    // Get moves stack for current game
+    function getGameViewData() {
+        
+        let url_string = gameViewUrl + '?start' + lastMoveFetched;
+        $.ajax({url: url_string, success: function(result) {
+          
+          if (result.status === undefined) {
+            curGame = result;
 
-
-
+            console.log("FETCHING GAME VIEW DATA...");
+            // push scores
+            for (i = 0; i < result.actions.length; i++) {
+              movesList.push(result.actions[i]);  
+            }  
+            lastMoveFetched = movesList.length;
+            console.log("Fetched " + lastMoveFetched + " moves...");
+            
+            // if maze not yet rendered...
+            if (!($('#maze_container').length)) {
+              renderGame();
+              playerLoc = '#' + movesList[0].location.row.toString() + 
+                          'x' + movesList[0].location.col.toString();
+              lastPlayerLoc = playerLoc;
+              setPlayerLoc();
+            }
+          }
+        }, error: function() {
+          console.log("Something went wrong when attempting to fetch Game data. Better ask for help.");
+        }}); // end ajax call
+      } // end getGameData()
 
 
 
@@ -716,12 +780,8 @@ html(lang='en')
 
 
     function renderGame() {
-      // TODO:
-      // Where is the ajax call to refresh maze data being inserted?
-      // Where to place movement buttons?
-      // utilize scale for items in games list 
       let cells = curGame.maze.cells;
-      let maze_width = cells[0].length * 50 //
+      let maze_width = cells[0].length * 50
       let parent_width = parseInt($('#main').css('width'));
 
       let cTxt ='';
@@ -779,28 +839,56 @@ html(lang='en')
       $('#media_controls').css('width', '500px');
       $('#media_controls').css('color', 'white')
       resizeContainer('maze_container', zoom_value);
+    } // END renderGame()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /***** code outside functions *****/
+
+
+    if (gameViewUrl != '') {  // Single game-view mode
+        // 1. Fetch game data
+        var fetchGameDataTimer = setTimeout(getGameViewData(), GAME_DATA_POLL);
+        // maze data is fetched and rendered (if not already)
+        // from within getGameViewData()
     }
 
-    // need to populate the list
-    refreshGames();
+    else {  // multi-game-view mode
+      // need to populate the list
+      refreshGames();
 
-    // then start the refresh timer
-    let gamesListRefreshRate = !{gamesListRefreshRate};
-    let gamesListTimer = setInterval(refreshGames, gamesListRefreshRate);
-    console.log('Current Games list refreshing every %dms.', gamesListRefreshRate);
-    
-    // change the rate at which the games list is refresshing
-    function changeGamesListRefreshRate(newInterval) {
-      if (newInterval < 500){
-        console.log('Too fast! Try 500 or more.  Current rate: %dms', gamesListRefreshRate);
-        return;
+      // then start the refresh timer
+      let gamesListRefreshRate = !{gamesListRefreshRate};
+      let gamesListTimer = setInterval(refreshGames, gamesListRefreshRate);
+      console.log('Current Games list refreshing every %dms.', gamesListRefreshRate);
+      
+      // change the rate at which the games list is refresshing
+      function changeGamesListRefreshRate(newInterval) {
+        if (newInterval < 500){
+          console.log('Too fast! Try 500 or more.  Current rate: %dms', gamesListRefreshRate);
+          return;
+        }
+        clearInterval(gamesListTimer);
+        gamesListTimer = setInterval(refreshGames, newInterval);
+        console.log('Current Games list refresh rate changed from %dms to %dms.', gamesListRefreshRate, newInterval);
+        gamesListRefreshRate = newInterval;
       }
-      clearInterval(gamesListTimer);
-      gamesListTimer = setInterval(refreshGames, newInterval);
-      console.log('Current Games list refresh rate changed from %dms to %dms.', gamesListRefreshRate, newInterval);
-      gamesListRefreshRate = newInterval;
+    
     }
+   
 
  
 
