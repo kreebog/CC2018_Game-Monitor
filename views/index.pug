@@ -6,13 +6,15 @@ html(lang='en')
   // Page Content
   .container-fluid.text-light
     // Row to organize columns in Bootstrap...
+    .row.text-monospace.border-left-0.border-right-0.pt-2(id='game_header' style='border: 1px solid white;line-height:1.5rem;height:85px')
+        .ml-3
+          img(id='teamLogo')
+        .ml-2.mt-2
+          span
+            span(id='viewTitle' style='color: white;') Game Monitor
+            div(id='viewSubTitle') Team Info
     .row
-      .col-md-6.mt-5.px-5
-        // Game Heading
-        div.text-monospace.border-left-0.border-right-0.pt-2(id='game_header' style='border: 1px solid white;')
-          h2.ml-3(id='viewTitle' style='color: white;') Game Monitor
-    .row
-      .card.col-md-7.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game')
+      .card.col-md-6.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game')
         div(id='main')
           h5 Please select a game from the list below to get started.
         .d-flex.justify-content-between.border.px-4.my-4.d-none(id="media_controls")
@@ -28,13 +30,12 @@ html(lang='en')
             span(class="fa fa-forward" style='font-size:26px')
           button(id='media_controls_ffw')
             span(class="fa fa-fast-forward" style='font-size:26px')
-        .d-flex.border-0.px-4.d-none 
-        .d-flex.border-0.px-4.d-none "Be Kind, Please Rewind"
+        .d-flex.border-0.px-4.d-none(id='playback-status-message') Loading moves...
         .d-flex.border-0.px-4.py-4.d-none
           select(id="step_switch")
             option(value="step") Step
             option(value="fast") Auto step
-      .card.col-md-3.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game_action')
+      .card.col-md-5.mx-4.my-4.pb-4.pt-3.px-4.border-0.text-light(id='game_action')
         table.table.table-sm.bg_transparent.small.text-center(id='curMovement')
           th(scope='col') Movement Actions
           tr
@@ -66,39 +67,15 @@ html(lang='en')
                 button(class='bg-primary' id='btn_jump') Jump
 
         .container(id='gameActivity')
-          h3.my-3(style='display:none;') Activity
-          table.hidden.table.table-sm.bg_transparent.text-center.small(id="activity_table" style='display:none;')
-            th(scope='col') Move
-            th(scope='col') Direction
-            th(scope='col') Action
-            th(scope='col') Cohesion
-            tr
-              td
-                // move number
-                span 1
-              td
-                // action
-                span
-                  h1.badge.badge-primary.badge-warning Move
-              td
-                // direction
-                span
-                  h1.badge.badge-primary.badge-warning East
-              td
-                // cohesion
-                span(id='actB1')
-                  h1.badge.badge-success.bot-badge B1
-                span(id='actB1')
-                  h1.badge.badge-danger.bot-badge B2
-                span(id='actB1')
-                  h1.badge.badge-success.bot-badge B3
-                span(id='actB1')
-                  h1.badge.badge-danger.bot-badge B4
-                span(id='actB1')
-                  h1.badge.badge-success.bot-badge B5
-                span
-                  h1.badge.badge-success.bot-badge B6
-          h3.my-3 Current Score
+          h3.my-3 Activity
+          table.hidden.table.table-sm.bg_transparent.text-center.small(id="activity_table")
+            thead 
+              th(scope='col') Move
+              th(scope='col') Action
+              th(scope='col') Direction
+              th(scope='col') Cohesion
+                tbody
+          h3.my-3 Score
           table.table.table-sm.bg_transparent.text-center.small
               th(scope='col') Round
               th(scope='col') Moves
@@ -113,7 +90,7 @@ html(lang='en')
           .container.small.outcomes-container(id='curGame_outcomes') 
             div(style="display: flex; justify-content: start;")
               div.mr-2 Sight: 
-              div.mr-2(id='engramSight') No activity reported...
+              div.mr-2(id='engramSight')
             div(style="display: flex; justify-content: start;")
               div.mr-2 Sound:
               div.engrams(id='engramSound')
@@ -124,8 +101,11 @@ html(lang='en')
               div.mr-2 Touch:
               div.engrams(id='engramTouch')
             div(style="display: flex; justify-content: start;")
-              div.mr-2 Taste: 
+              div.mr-2 Taste:
               div.engrams(id='engramTaste')
+            div(style="display: flex; justify-content: start;")
+              div.mr-2 Outcome: 
+              div.mr-2(id='engramOutcome')
     .row
       .col-12(id='games')
         h3 Current Games
@@ -134,20 +114,12 @@ html(lang='en')
   include foot.pug
 
 
-
-
-
-
-
-
-
  
   // JAVASCRIPT 
   script(src='/views/js/resize.js')
   script.
     
     // gameId and data URLs passed from direct view requests
-    // TESTING --> let gameViewUrl = 'http://game.code-camp-2018.com/actions/get/47ddb18a-352a-4f75-b264-c115ea6a39d3';
     let gameViewUrl = '!{gameViewUrl}';
     let gameViewId = '!{gameViewId}';
 
@@ -161,14 +133,15 @@ html(lang='en')
     let currentMove = 0;
     let playbackTimer; // used to control auto playback interval timer 
     let scoresList = new Array(); // two dimensional array holding scores for each action in curGame
+    let lastNewActionsFound = 0; // track the last time new actions were returned
+    let fetchGameDataTimer = -1; // control action fetch timer
+    const NO_NEW_ACTIONS_TIMEOUT = 180000; // if no new actions in the last 3 minutes (180k ms), cancel actions poll timer
 
     // PLAYBACK SPEEDS (1000 = 1 sec)
-    // Setting equal to 1 milisecond results in single steps
+    // Setting equal to 1ms results in single steps
     let REWIND_SPEED = 1;
-    let PLAY_SPEED = 250;
+    let PLAY_SPEED = 125;
     let FFORWARD_SPEED = 1;
-
-
 
     // default display settings
     $('#media_controls_pause').hide();
@@ -176,27 +149,8 @@ html(lang='en')
     $('#btn_gameplay_results').hide();
 
     // polling rates
-    const SINGLE_GAME_DATA_POLL = 250;
+    const SINGLE_GAME_DATA_POLL = 500;
     const MULTI_GAME_DATA_POLL = 500;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     // Popovers must be initialized with jQuery.
@@ -206,11 +160,9 @@ html(lang='en')
         template: '<div id="menu_popover" class="popover" role="tooltip"><h3 class="popover-header"></h3><div class="popover-body"></div></div>',
         html: true, 
         placement: 'bottom',
-        content: 'some different stuff here and herlansfdalkhsbfkhabgkhba;fjnbakjfsn;kjsafd;kjsa;kjd'
+        content: 'btn_gameplay_results content.'
       })
     });
-
-
 
 
     function resetGamesView(showNoGames, showError) {
@@ -246,7 +198,6 @@ html(lang='en')
 
       ret += t;
 
-    console.log(ret);
       return ret;
     }
 
@@ -284,26 +235,13 @@ html(lang='en')
           }
         });
         
-        console.log('You clicked ' + this.textContent + ", id=" + this.id);
       });
     }
-
 
     // true = enable
     // false = disable
     function movement(value) {
       value ? $('#curMovement').show() : $('#curMovement').hide();
-    }
-
-    // cleares player location indicator 
-    function clearPlayerLocs() {
-      for (var y = 0; x < curGame.maze.height; x++ ) {
-        for (var y = 0; y < curGame.maze.width; y++ )  {
-          let cellId = '#' + x + 'x' + y;
-          console.log(cellId);
-          $(cellId).html('.');
-        }
-      }
     }
 
     // Player Location
@@ -370,10 +308,21 @@ html(lang='en')
             renderGame();
             lastMoveFetched = 0;
             movesList = [];
-            let multi_game_interval = setInterval(getGameData, MULTI_GAME_DATA_POLL);
-            
-        }});
 
+            // don't start up the timer if it's already running
+            if (fetchGameDataTimer == -1) {
+              if (gameViewId != '') {
+                console.log('Starting fetchGameDataTimer(getGameViewData) at %sms interval.  Enabling playback...', SINGLE_GAME_DATA_POLL);
+                $('#media_controls_pause').css('display', 'block');
+                $('#media_controls_play').css('display', 'none');
+
+                fetchGameDataTimer = setInterval(getGameViewData, SINGLE_GAME_DATA_POLL);
+              } else {
+                console.log('Starting fetchGameDataTimer(getGameData) at %sms interval.', MULTI_GAME_DATA_POLL);
+                fetchGameDataTimer = setInterval(getGameData, MULTI_GAME_DATA_POLL);
+              }
+            }
+        }});
       }
     }
 
@@ -383,30 +332,29 @@ html(lang='en')
      * @param   engObj - Object containing strings pertaining to each of the 5 senses:
      * 1) sight, 2) sound, 3) smell, 4) touch, 5) taste. 
      *
+     * JD - tightened this up a bit
      */
     function updateEngrams(engObj) {
-      
-          (engObj.sight.length > 1) ? $('#engramSight').html(engObj.sight) : $('#engramSight').html(' ');
-
-          (engObj.sound.length > 1) ? $('#engramSound').html(engObj.sound) : $('#engramSound').html(' ');
-
-          (engObj.smell.length > 1) ? $('#engramSmell').html(engObj.smell) : $('#engramSmell').html(' ');
-
-          (engObj.touch.length > 1) ? $('#engramTouch').html(engObj.touch) : $('#engramTouch').html(' ');
-
-          (engObj.taste.length > 1) ? $('#engramTaste').html(engObj.taste) : $('#engramTaste').html(' ');
+      $('#engramSight').html(engObj.sight.length > 1 ? engObj.sight: ' ');
+      $('#engramSound').html(engObj.sound.length > 1 ? engObj.sound: ' ');
+      $('#engramSmell').html(engObj.smell.length > 1 ? engObj.smell: ' ');
+      $('#engramTouch').html(engObj.touch.length > 1 ? engObj.touch: ' ');
+      $('#engramTaste').html(engObj.taste.length > 1 ? engObj.taste: ' ');
     }
 
-
-
+    // add outcomes to the engram sight box
+    function updateOutcomes(ocObj) {
+        $('#engramOutcome').html('');
+        for (var x = 0; x < ocObj.length; x++) {
+          if (x > 0) $('#engramOutcome').append('<br>');
+          $('#engramOutcome').append(ocObj[x]);
+        }
+    }
 
     function updateActivity() {
 
       for (i = currentMove-5; i < currentMove+5; i++ ) {
         if (movesList[currentMove] != undefined) {
-
-
-
         //- h1.badge.badge-primary.badge-warning Move
         //- 
         //- y.appendChild(t);
@@ -439,31 +387,24 @@ html(lang='en')
         document.getElementById("activity_table").appendChild(new_table_row);
 
 
-
         // Move 
-
         // Action
         
-
         // Direction
         movesList[i].direction;
 
         // Cohesion - comes in as array movesList.botCohesion
         // unresponsive bots are grayed out. wait... how to display bot cohesion?
 
-
-
-
         }
       }
     } // end updateActivity()
 
 
-
     /* function updateScores(round, move, back, bonus)
      * @param   round - updates current score >> Round
      * @param   move  - updates current score >> Moves
-     * @param   back  - updates crrent score >> Backtracks
+     * @param   back  - updates current score >> Backtracks
      * @param   bonus - updates current score >> Bonus (points)
      */
     function updateScores(round, move, back, bonus) {
@@ -487,6 +428,7 @@ html(lang='en')
                 // clear the timer to be
                 // sure that we don't get two timers at once
                 clearInterval(playbackTimer);
+                clearInterval(playNewActionsTimer);
                 
                   tmp = '';
                   while (true) {
@@ -503,6 +445,10 @@ html(lang='en')
                         movesList[currentMove].score.moveCount, 
                         movesList[currentMove].score.backtrackCount, 
                         movesList[currentMove].score.bonusPoints);
+
+                      updateOutcomes(movesList[currentMove].outcome);
+                      renderAction(movesList[currentMove]);
+                      
                     }
                     else break;
                   }
@@ -514,6 +460,7 @@ html(lang='en')
                 // clear the timer to be
                 // sure that we don't get two timers at once
                 clearInterval(playbackTimer);
+                clearInterval(playNewActionsTimer);
                 
                 if (REWIND_SPEED == 1) {  // single move per click
                     tmp = getMovePlayback('prev');
@@ -529,6 +476,11 @@ html(lang='en')
                         movesList[currentMove].score.moveCount, 
                         movesList[currentMove].score.backtrackCount, 
                         movesList[currentMove].score.bonusPoints);
+                      
+                      updateOutcomes(movesList[currentMove].outcome);
+                      renderAction(movesList[currentMove]);
+
+                      
                     }
                 }
 
@@ -554,7 +506,11 @@ html(lang='en')
                         movesList[currentMove].score.backtrackCount, 
                         movesList[currentMove].score.bonusPoints);
                       
+                      updateOutcomes(movesList[currentMove].outcome);
+                      renderAction(movesList[currentMove]);
+
                     } else { // getMovePlayback returned undefined
+                      clearInterval(playNewActionsTimer);
                       clearInterval(playbackTimer);
                       $('#media_controls_pause').hide();
                       $('#media_controls_play').show();
@@ -567,10 +523,11 @@ html(lang='en')
           case 'media_controls_play' : {
                 // clear the timer to be
                 // sure that we don't get two timers at once
+                clearInterval(playNewActionsTimer);
                 clearInterval(playbackTimer);
 
-              $('#media_controls_play').hide();
-              $('#media_controls_pause').show();
+                $('#media_controls_play').hide();
+                $('#media_controls_pause').show();
 
                 // create a timer to play back the game
                 playbackTimer = setInterval( function() {
@@ -590,6 +547,8 @@ html(lang='en')
                     movesList[currentMove].score.moveCount, 
                     movesList[currentMove].score.backtrackCount, 
                     movesList[currentMove].score.bonusPoints);
+                  updateOutcomes(movesList[currentMove].outcome);
+                  renderAction(movesList[currentMove]);
                 }
                 else {  // getMovePlayback returned undefined
                   clearInterval(playbackTimer);
@@ -600,6 +559,7 @@ html(lang='en')
           }
 
           case 'media_controls_pause' : {
+              clearInterval(playNewActionsTimer);
               clearInterval(playbackTimer);
               $('#media_controls_pause').hide();
               $('#media_controls_play').show();
@@ -607,7 +567,8 @@ html(lang='en')
           }
           
           case 'media_controls_forward' : {
-              clearInterval(playbackTimer);
+              clearInterval(playNewActionsTimer);
+              clearInterval(playbackTimer);clearInterval(playbackTimer);
               let tmp = '';
                 if (FFORWARD_SPEED == 1) {  // single move per click
                     tmp = getMovePlayback('next');
@@ -623,6 +584,10 @@ html(lang='en')
                         movesList[currentMove].score.moveCount, 
                         movesList[currentMove].score.backtrackCount, 
                         movesList[currentMove].score.bonusPoints);
+
+                      updateOutcomes(movesList[currentMove].outcome);
+                      renderAction(movesList[currentMove]);
+
                     }
 
                 } else {
@@ -645,6 +610,10 @@ html(lang='en')
                             movesList[currentMove].score.moveCount, 
                             movesList[currentMove].score.backtrackCount, 
                             movesList[currentMove].score.bonusPoints);
+
+                          updateOutcomes(movesList[currentMove].outcome);
+                          renderAction(movesList[currentMove]);
+
                         }
                         else {
                           clearInterval(playbackTimer);
@@ -674,10 +643,11 @@ html(lang='en')
                     movesList[currentMove].score.moveCount, 
                     movesList[currentMove].score.backtrackCount, 
                     movesList[currentMove].score.bonusPoints);
+
+                  updateOutcomes(movesList[currentMove].outcome);
+                  renderAction(movesList[currentMove]);
                 }
               }
-              
-
           }
         }
       });
@@ -708,7 +678,7 @@ html(lang='en')
     // Get moves stack for current game in multi-game view
     function getGameData() {
       console.log('Tick: getGameData');
-      let gameDataURL = 'http://game.code-camp-2018.com/actions/get/' + curGame.id + '?start=' + (lastMoveFetched+1).toString();
+      let gameDataURL = 'http://game.code-camp-2018.com/actions/get/' + curGame.id + '?start=' + (lastMoveFetched + 1);
       $.ajax({url: gameDataURL, success: function(result) {
  
         if (result.status === undefined) {
@@ -733,77 +703,138 @@ html(lang='en')
     } // end 
 
 
+    /**
+     * Plays through the given array of actions to catch up
+     * to what's happened on the server since the last actions/get poll
+     */
+    let playNewActionsTimer = -1;
+    let newActionPos = 0;
+    
+    function playNewActions() {
+
+      // stop the getGameViewData fetch timer while this one is running - restart it at the end
+      clearInterval(fetchGameDataTimer);
+
+      try {
+
+        $('#playback-status-message').html('Catching up....');
+
+        // async calls might throw this out of whack - if that happens, fix it here.
+        if (newActionPos > movesList.length - 1) newActionPos == movesList.length -1;
+
+        // update current move
+        currentMove = newActionPos;
+
+        // console.log("newActionPos: %s currentMove: %s movesList.length: %s", newActionPos, currentMove, movesList.length);
+
+        // update player location      
+        lastPlayerLoc = playerLoc;
+        playerLoc = '#' + movesList[newActionPos].location.row + 'x' + movesList[newActionPos].location.col;
+        setPlayerLoc();
+
+        // update scores at each interval
+        updateScores(movesList[newActionPos].score.gameRound, 
+          movesList[newActionPos].score.moveCount, 
+          movesList[newActionPos].score.backtrackCount, 
+          movesList[newActionPos].score.bonusPoints);
+
+        // update engrams
+        updateEngrams(movesList[newActionPos].engram);
+        renderAction(movesList[currentMove]);
+
+        // add outcomes to text display
+        if (movesList[newActionPos].outcome !== undefined && movesList[newActionPos].outcome.length > 0) {
+          updateOutcomes(movesList[newActionPos].outcome);
+        }
+      } catch (err) {
+        console.error('Error in playNewAction, clearing playNewActionsTimer. Error: %s', err);
+        clearInterval(playNewActionsTimer);
+      } finally {
+          // one more check to make sure we're in bounds... annoying!
+          if (newActionPos > movesList.length - 1) newActionPos = movesList.length - 1;
+
+          // restart the getGameViewData timer now that we're caught up
+          if (gameViewId != '') {
+            //console.log('Starting fetchGameDataTimer(getGameViewData) at %sms interval.', SINGLE_GAME_DATA_POLL);
+            fetchGameDataTimer = setInterval(getGameViewData, SINGLE_GAME_DATA_POLL);
+          } else {
+            //console.log('Starting fetchGameDataTimer(getGameData) at %sms interval.', MULTI_GAME_DATA_POLL);
+            fetchGameDataTimer = setInterval(getGameData, MULTI_GAME_DATA_POLL);
+          }
+
+        $('#playback-status-message').html('');
+      }
+
+      // end playback when actions are exhausted
+      if (newActionPos == movesList.length - 1) {
+        //console.log('Action playback complete, clearing PlayNewActionsTimer.');
+        clearInterval(playNewActionsTimer);
+      } else {
+        newActionPos++;
+      }
+    }
 
     /* function getGameViewData()
      * Returns the game stack, including all kinds of neat stuff
      * such as moves and corresponding positions, scores, etc...
      */
-    // Get moves stack for current game
     function getGameViewData() {
-      
+      // hide some controls we don't need for gameView Mode
+      $('#games').hide();
+      $('#step_switch').hide();
+
       console.log('Tick: getGameViewData() : ' + gameViewUrl);
 
-        let url_string = gameViewUrl + '?start=' + lastMoveFetched;
-        $.ajax({url: url_string, success: function(result) {
+      // if maze not yet rendered...
+      $('#playback-status-message').html('Rendering maze...');
+      if (!($('#maze_container').length)) selectGame(gameViewId, gameViewUrl);
 
+      let url_string = 'http://game.code-camp-2018.com/actions/get/' + gameViewId + '?start=' + (lastMoveFetched + 1);
+      $('#playback-status-message').html('Loading actions...');
+      $.ajax({
+        url: url_string, success: function(result) {
           if (result.status === undefined && result.length > 0) {
-            // push scores
-                for (i = 0; i < result.length; i++) {
-                movesList.push(result[i]);  
-              }  
-            
-            lastMoveFetched = movesList.length;
+              //console.log('result::' + JSON.stringify(result));
+              lastNewActionsFound = Date.now();
 
-            // if maze not yet rendered...
-            if (!($('#maze_container').length)) {
-              getMazeView();
-            }
-            else {
+              // add the new moves to the moves list
+              for (i = 0; i < result.length; i++) {
+                  movesList.push(result[i]);
+              }
+              
+              // start playing new actions with interval calculated to catch up by the time the next new actions poll happens
+              newActionPos = lastMoveFetched > 0 ? lastMoveFetched - 1 : 0;
+              lastMoveFetched = movesList.length;
+
+              if ($('#media_controls_pause').css('display') != 'none') {
+                var newActionPlaybackSpeed = Math.floor(SINGLE_GAME_DATA_POLL / (result.length)) + 5;
+                playNewActionsTimer = setInterval(playNewActions, newActionPlaybackSpeed);
+              }
+
+            } else {
               currentMove = movesList.length - 1;
-              playerLoc = '#' + movesList[currentMove].location.row.toString() +
-                          'x' + movesList[currentMove].location.col.toString();
-              lastPlayerLoc = '#' + movesList[currentMove-1].location.row.toString() +
-                              'x' + movesList[currentMove-1].location.col.toString();
-            setPlayerLoc();
-
-            $('#curGame_round').html(result.score.gameRound);
-            $('#curGame_moves').html(result.score.moveCount);
-            $('#curGame_backtracks').html(result.score.backtrackCount);
-            $('#curGame_bonus').html(result.score.bonusPoints);
-            if (result.outcome !== undefined) $('#curGame_outcomes').html(result.outcome.join('<br>'));
-            if (result.engram !== undefined) $('#curGame_outcomes').append('<br>' + result.engram.sight + '<br>' + result.engram.sound + '<br>' + result.engram.smell + '<br>' + result.engram.touch + '<br>' + result.engram.taste + '<br>');
-
+              // no new actions - check for wait timeout and cancel timer if needed
+              if (Date.now() - lastNewActionsFound > NO_NEW_ACTIONS_TIMEOUT) {
+                //console.log('No new actions in last %s minutes, cancelling fetchGameDataTimer.', NO_NEW_ACTIONS_TIMEOUT / 1000 / 60 );
+                clearInterval(fetchGameDataTimer);
+              }
             }
-          }
-        }, error: function() {
-          console.log("Something went wrong when attempting to fetch Game data. Better ask for help.");
-        }}); // end ajax call
-      } // end getGameData()
+          } // end success
+        , error: function() { console.log("Error in getGameViewData()"); } 
+      }); // end ajax call
 
-
-
-    /* function getMazeView()
-     * Returns maze data for current game and calls renderGame;
-     */
-    function getMazeView() {
-      if (movesList.length) {
-        let url_string = 'http://game.code-camp-2018.com/game/' + movesList[0].score.gameId;
-
-        $.ajax({url: url_string, success: function(result) {
-          if (result.status == undefined) {
-            
-            curGame = result;
-            renderGame();
-          }
-        }, error: function() {
-          console.log("Something went wrong when attempting to fetch Game data. Better ask for help.");
-        }}); // end ajax call
-
+      // cancel this timer if the game goes into a finished state (states: 0=new, 1=in progress, 2=finished, 3=aborted, 4=error)
+      if (curGame.state > 1) {
+        $('#playback-status-message').html('GAME ENDED');
+        console.log('Game state is %s, cancelling fetchGameDataTimer.', curGame.state);
+        clearInterval(fetchGameDataTimer);
+      } else {
+        $('#playback-status-message').html('');
       }
-       
-      } // end getGameData()
 
 
+
+    } // end getGameData()
 
     function renderGame() {
       let cells = curGame.maze.cells;
@@ -812,7 +843,25 @@ html(lang='en')
 
       let cTxt ='';
 
-      $('#viewTitle').html(curGame.team.name + ' in ' + curGame.maze.seed);
+      // Set the title values
+      if (curGame.botId !== '') {
+          $('#teamLogo').attr('src', '/views/images/' + curGame.team.logo);
+          $('#viewTitle').html(curGame.team.name + ' in ' + curGame.maze.seed);
+          
+          var botInfo = getBotNameById(curGame.team, curGame.botId) + ' (' + getBotCoderByBotId(curGame.team, curGame.botId) + ')';
+          $('#viewSubTitle').html(botInfo);
+      } else {
+          $('#teamLogo').attr('src', '/views/images/' + curGame.team.logo);
+          $('#viewTitle').html(curGame.team.name + ' in ' + curGame.maze.seed);
+          var playerNames = '';
+          playerNames += curGame.team.bots[0].coder + ' [B1], ';
+          playerNames += curGame.team.bots[1].coder + ' [B2], ';
+          playerNames += curGame.team.bots[2].coder + ' [B3], ';
+          playerNames += curGame.team.bots[3].coder + ' [B4], ';
+          if (curGame.team.bots[4].coder != 'NOT USED') playerNames += curGame.team.bots[4].coder + ' [B5]';
+          
+          $('#viewSubTitle').html(playerNames);
+      }
 
       // Create new maze container and insert into vpGame 
       $('#main').html('');
@@ -869,14 +918,10 @@ html(lang='en')
 
 
     /***** code outside functions *****/
-
-
     if (gameViewUrl != '') {  // Single game-view mode
-        // 1. Fetch game data
+        // select game sets fetchGameDataTimer
         selectGame(gameViewId, gameViewUrl);
-        var fetchGameDataTimer = setInterval(getGameViewData, SINGLE_GAME_DATA_POLL);
-        // maze data is fetched and rendered (if not already)
-        // from within getGameViewData()
+        lastNewActionsFound = Date.now(); // used to cancel fetchGameDataTimer if no activity
     }
 
     else {  // multi-game-view mode
@@ -888,7 +933,7 @@ html(lang='en')
       let gamesListTimer = setInterval(refreshGames, gamesListRefreshRate);
       console.log('Current Games list refreshing every %dms.', gamesListRefreshRate);
       
-      // change the rate at which the games list is refresshing
+      // change the rate at which the games list is refreshing
       function changeGamesListRefreshRate(newInterval) {
         if (newInterval < 500){
           console.log('Too fast! Try 500 or more.  Current rate: %dms', gamesListRefreshRate);
@@ -901,9 +946,77 @@ html(lang='en')
       }
     
     }
-   
 
+    // return the name of the bot with the id
+    function getBotNameById(team, botId) {
+        let bots = team.bots;
+        for (let x = 0; x < bots.length; x++) {
+            if (bots[x].id == botId) return bots[x].name;
+        }
+        return 'Mystery Bot';
+    }
  
+    // return the name of the bot with the id
+    function getBotCoderByBotId(team, botId) {
+        let bots = team.bots;
+        for (let x = 0; x < bots.length; x++) {
+            if (bots[x].id == botId) return bots[x].coder;
+        }
+        return 'Mystery Hacker';
+    }
 
- 
-    
+    function renderAction(action) {
+      let dir = (action.direction == '' ? 'N/A' : action.direction);
+      let act = (action.action == '' ? 'N/A' : action.action);
+
+      let row = '';
+      row += '<tr id="__ACT_ROW_' + action.score.moveCount + '">';
+      row += '  <td><span>' + action.score.moveCount + '</td></span>';
+      row += '  <td><span><h1 class="badge badge-' + getActionBadgeClass(act) + '">' + act + '</td></span>';
+      row += '  <td><span><h1 class="badge badge-' + getDirectionBadgeClass(dir) + '">' + dir + '</td></span>';
+      row += '  <td><span>';
+      row += '    <h1 class="badge bot-badge badge-' + (!action.botCohesion[0] ? 'dark' : getBotBadgeClass(action.botCohesion[0])) + '">B1</h1>';
+      row += '    <h1 class="badge bot-badge badge-' + (!action.botCohesion[1] ? 'dark' : getBotBadgeClass(action.botCohesion[1])) + '">B2</h1>';
+      row += '    <h1 class="badge bot-badge badge-' + (!action.botCohesion[2] ? 'dark' : getBotBadgeClass(action.botCohesion[2])) + '">B3</h1>';
+      row += '    <h1 class="badge bot-badge badge-' + (!action.botCohesion[3] ? 'dark' : getBotBadgeClass(action.botCohesion[3])) + '">B4</h1>';
+      row += '    <h1 class="badge bot-badge badge-' + (!action.botCohesion[4] ? 'dark' : getBotBadgeClass(action.botCohesion[4])) + '">B5</h1>';
+      row += '  </td></span>';
+      row += '</tr>';
+
+      // trim the bottom action off
+      if ($('#activity_table tbody').children().length >= 8 ) {
+        $('#activity_table tbody tr:last').remove();
+      }
+
+      // add a new row at the top
+      if ($('#activity_table tbody').children().length == 0) {
+        $('#activity_table tbody').append(row);
+      }
+
+      $('#activity_table tbody tr:first').before(row);
+
+    }
+
+    function getDirectionBadgeClass(dir) {
+        if (dir == 'NORTH') return 'warning';
+        if (dir == 'SOUTH') return 'success';
+        if (dir == 'EAST') return 'primary';
+        if (dir == 'WEST') return 'info';
+        return 'dark';
+    }
+
+    function getActionBadgeClass(act) {
+        if (act == 'MOVE') return 'success';
+        if (act == 'LOOK') return 'warning';
+        if (act == 'JUMP') return 'danger';
+        if (act == 'WRITE') return 'primary';
+        return 'dark';
+    }
+
+    function getBotBadgeClass(cScore) {
+      if (cScore == 0) return 'danger';
+      if (cScore < .50) return 'warning';
+      if (cScore < 1) return 'primary';
+      if (cScore == 1) return 'success';
+      return 'info';
+    }

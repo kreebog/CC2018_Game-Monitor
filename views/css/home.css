@@ -1,5 +1,5 @@
 body {
-    padding-top: 54px;
+    /*    padding-top: 54px;   */
     background: url(../images/digital.jpg);
     background-size: cover;
     background-repeat: no-repeat;
@@ -19,9 +19,23 @@ body {
 }
 
 @media (min-width: 992px) {
-    body {
-        padding-top: 56px;
-    }
+}
+
+#viewTitle {
+    font-size: 2rem;
+    color: lightgray;
+}
+
+#viewSubTitle {
+    font-size: 1rem;
+    color: slategray;
+}
+
+#teamLogo {
+    width: 65px;
+    height: 65px;
+    margin-right: 5px;
+    float: left;
 }
 
 .outcomes-container {

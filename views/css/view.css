@@ -15,6 +15,11 @@ body {
     /* margin-left: 25px; */
 }
 
+#playback-status-message {
+    color: red;
+    font-size: 1rem;
+}
+
 .maze-row {
     border: none;
     margin: 0;
@@ -36,6 +41,15 @@ body {
     margin: 0;
     padding: 0;
     /*    content: url('/views/images/stone_gray_1.png'); */
+}
+
+.cell-visited {
+    background-color: #000;
+}
+
+.cell-visit-count {
+    font-size: 0.25rem;
+    color: red;
 }
 
 .path {
