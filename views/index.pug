@@ -429,6 +429,7 @@ html(lang='en')
                 // sure that we don't get two timers at once
                 clearInterval(playbackTimer);
                 clearInterval(playNewActionsTimer);
+                clearInterval(fetchGameDataTimer);
                 
                   tmp = '';
                   while (true) {
@@ -461,6 +462,8 @@ html(lang='en')
                 // sure that we don't get two timers at once
                 clearInterval(playbackTimer);
                 clearInterval(playNewActionsTimer);
+                clearInterval(fetchGameDataTimer);
+
                 
                 if (REWIND_SPEED == 1) {  // single move per click
                     tmp = getMovePlayback('prev');
@@ -512,6 +515,7 @@ html(lang='en')
                     } else { // getMovePlayback returned undefined
                       clearInterval(playNewActionsTimer);
                       clearInterval(playbackTimer);
+                      clearInterval(fetchGameDataTimer);
                       $('#media_controls_pause').hide();
                       $('#media_controls_play').show();
                     } 
@@ -525,6 +529,7 @@ html(lang='en')
                 // sure that we don't get two timers at once
                 clearInterval(playNewActionsTimer);
                 clearInterval(playbackTimer);
+                clearInterval(fetchGameDataTimer);
 
                 $('#media_controls_play').hide();
                 $('#media_controls_pause').show();
@@ -561,6 +566,7 @@ html(lang='en')
           case 'media_controls_pause' : {
               clearInterval(playNewActionsTimer);
               clearInterval(playbackTimer);
+              clearInterval(fetchGameDataTimer);
               $('#media_controls_pause').hide();
               $('#media_controls_play').show();
               break;
@@ -568,7 +574,8 @@ html(lang='en')
           
           case 'media_controls_forward' : {
               clearInterval(playNewActionsTimer);
-              clearInterval(playbackTimer);clearInterval(playbackTimer);
+              clearInterval(playbackTimer);
+              clearInterval(fetchGameDataTimer);
               let tmp = '';
                 if (FFORWARD_SPEED == 1) {  // single move per click
                     tmp = getMovePlayback('next');
@@ -626,8 +633,9 @@ html(lang='en')
           }
           
           case 'media_controls_ffw' : {
+              clearInterval(playNewActionsTimer);
               clearInterval(playbackTimer);
-
+              clearInterval(fetchGameDataTimer);
               let tmp = '';
 
               while (tmp != undefined) {
